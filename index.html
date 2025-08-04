@@ -88,6 +88,7 @@
             border-width: 1px;
             padding: 0.75rem;
             border-radius: 0.75rem;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .review-item:not(:last-child) {
             border-bottom-width: 1px;
@@ -297,7 +298,7 @@
             transition: opacity 0.3s ease;
         }
         #image-lightbox img {
-            transition: transform 0.3s ease;
+            transition: transform 0.1s ease;
         }
         #lightbox-prev, #lightbox-next {
             transition: background-color 0.2s;
@@ -306,6 +307,14 @@
             background-color: rgba(0,0,0,0.3);
         }
 
+        /* Community Board Tabs and Pagination */
+        .board-tab {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .pagination-btn {
+            transition: all 0.2s ease;
+        }
 
         /* --- Aurora Animation --- */
         @keyframes aurora-animation {
@@ -322,6 +331,7 @@
         .theme-sikdae .theme-bg-header, .theme-sikdae .theme-bg-card { background-color: rgba(12, 45, 33, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(52, 211, 153, 0.2); border-radius: 1rem; }
         .theme-sikdae .theme-border, .theme-sikdae .review-item { border-color: rgba(52, 211, 153, 0.2); }
         .theme-sikdae .comment-item { border-color: rgba(52, 211, 153, 0.2); background-color: rgba(16, 185, 129, 0.05); }
+        .theme-sikdae .comment-item.my-comment { background-color: rgba(52, 211, 153, 0.15); border-color: rgba(52, 211, 153, 0.4); }
         .theme-sikdae .theme-text-header, .theme-sikdae .theme-text-strong { color: #6ee7b7; }
         .theme-sikdae .theme-text-title { color: #f0fdf4; }
         .theme-sikdae .theme-text-subtitle { color: #a7f3d0; }
@@ -344,6 +354,11 @@
         .theme-sikdae #special-day-banner { background-color: rgba(16, 185, 129, 0.8); color: white; }
         .theme-sikdae .reply-item { border-color: rgba(52, 211, 153, 0.3); }
         .theme-sikdae .nickname-tag { background-color: rgba(52, 211, 153, 0.2); color: #a7f3d0; }
+        .theme-sikdae .board-tab.active { border-color: #34d399; color: #6ee7b7; }
+        .theme-sikdae .pagination-btn { background-color: rgba(52, 211, 153, 0.1); }
+        .theme-sikdae .pagination-btn:hover { background-color: rgba(52, 211, 153, 0.2); }
+        .theme-sikdae .pagination-btn.active { background-color: #34d399; color: #064e3b; }
+        .theme-sikdae .pagination-btn:disabled { background-color: rgba(52, 211, 153, 0.1); opacity: 0.5; }
 
         body.theme-sikdae.aurora-mode {
             background: linear-gradient(270deg, #052e16, #064e3b, #10b981, #0c2d21);
@@ -359,6 +374,7 @@
         .theme-gangnam .theme-bg-header, .theme-gangnam .theme-bg-card { background-color: rgba(40, 16, 64, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(192, 132, 252, 0.2); border-radius: 1rem; }
         .theme-gangnam .theme-border, .theme-gangnam .review-item { border-color: rgba(192, 132, 252, 0.2); }
         .theme-gangnam .comment-item { border-color: rgba(192, 132, 252, 0.2); background-color: rgba(168, 85, 247, 0.05); }
+        .theme-gangnam .comment-item.my-comment { background-color: rgba(168, 85, 247, 0.15); border-color: rgba(192, 132, 252, 0.4); }
         .theme-gangnam .theme-text-header, .theme-gangnam .theme-text-strong { color: #d8b4fe; }
         .theme-gangnam .theme-text-title { color: #f3e8ff; }
         .theme-gangnam .theme-text-subtitle { color: #e9d5ff; }
@@ -381,6 +397,11 @@
         .theme-gangnam #special-day-banner { background-color: rgba(168, 85, 247, 0.8); color: white; }
         .theme-gangnam .reply-item { border-color: rgba(192, 132, 252, 0.3); }
         .theme-gangnam .nickname-tag { background-color: rgba(192, 132, 252, 0.2); color: #e9d5ff; }
+        .theme-gangnam .board-tab.active { border-color: #c084fc; color: #d8b4fe; }
+        .theme-gangnam .pagination-btn { background-color: rgba(192, 132, 252, 0.1); }
+        .theme-gangnam .pagination-btn:hover { background-color: rgba(192, 132, 252, 0.2); }
+        .theme-gangnam .pagination-btn.active { background-color: #c084fc; color: #3b0764; }
+        .theme-gangnam .pagination-btn:disabled { background-color: rgba(192, 132, 252, 0.1); opacity: 0.5; }
         
         body.theme-gangnam.aurora-mode {
             background: linear-gradient(270deg, #3b0764, #581c87, #9333ea, #281040);
@@ -396,6 +417,7 @@
         .theme-community .theme-bg-header, .theme-community .theme-bg-card { background-color: rgba(14, 37, 63, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(96, 165, 250, 0.2); border-radius: 1rem; }
         .theme-community .theme-border, .theme-community .review-item { border-color: rgba(96, 165, 250, 0.2); }
         .theme-community .comment-item { border-color: rgba(96, 165, 250, 0.2); background-color: rgba(59, 130, 246, 0.05); }
+        .theme-community .comment-item.my-comment { background-color: rgba(59, 130, 246, 0.15); border-color: rgba(96, 165, 250, 0.4); }
         .theme-community .theme-text-header, .theme-community .theme-text-strong { color: #93c5fd; }
         .theme-community .theme-text-title { color: #dbeafe; }
         .theme-community .theme-text-subtitle { color: #bfdbfe; }
@@ -417,6 +439,11 @@
         .theme-community #special-day-banner { background-color: rgba(37, 99, 235, 0.8); color: white; }
         .theme-community .reply-item { border-color: rgba(96, 165, 250, 0.3); }
         .theme-community .nickname-tag { background-color: rgba(96, 165, 250, 0.2); color: #bfdbfe; }
+        .theme-community .board-tab.active { border-color: #3b82f6; color: #93c5fd; }
+        .theme-community .pagination-btn { background-color: rgba(59, 130, 246, 0.1); }
+        .theme-community .pagination-btn:hover { background-color: rgba(59, 130, 246, 0.2); }
+        .theme-community .pagination-btn.active { background-color: #3b82f6; color: white; }
+        .theme-community .pagination-btn:disabled { background-color: rgba(59, 130, 246, 0.1); opacity: 0.5; }
 
         body.theme-community.aurora-mode {
             background: linear-gradient(270deg, #0c2a4d, #1e40af, #3b82f6, #0e253f);
@@ -432,6 +459,7 @@
         .theme-pub .theme-bg-header, .theme-pub .theme-bg-card { background-color: rgba(30, 16, 5, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(251, 146, 60, 0.2); border-radius: 1rem; }
         .theme-pub .theme-border, .theme-pub .review-item { border-color: rgba(251, 146, 60, 0.2); }
         .theme-pub .comment-item { border-color: rgba(251, 146, 60, 0.2); background-color: rgba(249, 115, 22, 0.05); }
+        .theme-pub .comment-item.my-comment { background-color: rgba(249, 115, 22, 0.15); border-color: rgba(251, 146, 60, 0.4); }
         .theme-pub .theme-text-header, .theme-pub .theme-text-strong { color: #fb923c; }
         .theme-pub .theme-text-title { color: #ffedd5; }
         .theme-pub .theme-text-subtitle { color: #fdba74; }
@@ -454,6 +482,11 @@
         .theme-pub #special-day-banner { background-color: rgba(249, 115, 22, 0.8); color: white; }
         .theme-pub .reply-item { border-color: rgba(251, 146, 60, 0.3); }
         .theme-pub .nickname-tag { background-color: rgba(251, 146, 60, 0.2); color: #fdba74; }
+        .theme-pub .board-tab.active { border-color: #f97316; color: #fb923c; }
+        .theme-pub .pagination-btn { background-color: rgba(249, 115, 22, 0.1); }
+        .theme-pub .pagination-btn:hover { background-color: rgba(249, 115, 22, 0.2); }
+        .theme-pub .pagination-btn.active { background-color: #f97316; color: #451a03; }
+        .theme-pub .pagination-btn:disabled { background-color: rgba(249, 115, 22, 0.1); opacity: 0.5; }
 
         body.theme-pub.aurora-mode {
             background: linear-gradient(270deg, #451a03, #78350f, #f97316, #200d02);
@@ -518,30 +551,28 @@
                     </div>
                 </section>
 
-                <!-- 자유 게시판 -->
+                <!-- Community Boards Section -->
                 <section class="p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
-                    <div id="toggle-general-comments" class="flex justify-between items-center cursor-pointer">
-                        <h2 class="text-xl md:text-2xl font-bold theme-text-header">자유 게시판 💬</h2>
-                        <svg class="w-5 h-5 md:w-6 md:h-6 theme-text-header transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <div id="general-comments-container" class="accordion-content mt-4 theme-border">
-                        <div id="general-comment-list" class="space-y-4 mb-4"></div>
+                    <nav class="flex border-b theme-border mb-6">
+                        <button data-board="general" class="board-tab py-3 px-6 text-lg font-semibold theme-text-subtitle active">자유 게시판 💬</button>
+                        <button data-board="restaurant" class="board-tab py-3 px-6 text-lg font-semibold theme-text-subtitle">맛집 추천 게시판 🍽️</button>
+                    </nav>
+
+                    <!-- General Comments Board -->
+                    <div id="general-board-content" class="board-content">
+                        <div id="general-comment-list" class="space-y-4 mb-6"></div>
+                        <div id="general-pagination" class="flex justify-center items-center space-x-2 my-4"></div>
                         <div class="comment-form space-y-2 mt-4">
                             <input type="text" id="general-nickname-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="닉네임을 입력하세요...">
                             <textarea id="general-comment-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="자유로운 이야기를 남겨주세요..." rows="3"></textarea>
                             <button type="button" id="general-comment-post-btn" class="comment-post-btn w-full px-4 py-2 rounded-md font-semibold text-sm">등록</button>
                         </div>
                     </div>
-                </section>
 
-                <!-- 맛집 추천 게시판 -->
-                <section class="p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
-                    <div id="toggle-restaurant-comments" class="flex justify-between items-center cursor-pointer">
-                        <h2 class="text-xl md:text-2xl font-bold theme-text-header">맛집 추천 게시판 🍽️</h2>
-                        <svg class="w-5 h-5 md:w-6 md:h-6 theme-text-header transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <div id="restaurant-comments-container" class="accordion-content mt-4 theme-border">
-                        <div id="restaurant-comment-list" class="space-y-4 mb-4"></div>
+                    <!-- Restaurant Comments Board -->
+                    <div id="restaurant-board-content" class="board-content hidden">
+                        <div id="restaurant-comment-list" class="space-y-4 mb-6"></div>
+                        <div id="restaurant-pagination" class="flex justify-center items-center space-x-2 my-4"></div>
                         <div class="comment-form space-y-2 mt-4">
                             <input type="text" id="restaurant-nickname-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="닉네임을 입력하세요...">
                             <textarea id="restaurant-comment-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="추천 맛집에 대한 이야기를 남겨주세요..." rows="3"></textarea>
@@ -722,6 +753,18 @@
         let lightbox, lightboxImage, lightboxClose, lightboxPrev, lightboxNext;
         let currentLightboxImages = [];
         let currentLightboxIndex = 0;
+        let lightboxScale = 1;
+        let isPanning = false;
+        let startPanX = 0, startPanY = 0;
+        let currentPanX = 0, currentPanY = 0;
+
+
+        // ==================== Pagination State ====================
+        let generalCommentsCurrentPage = 1;
+        let restaurantCommentsCurrentPage = 1;
+        const COMMENTS_PER_PAGE = 10;
+        const openReplyContainers = new Set();
+
 
         // ==================== Common Functions ====================
         
@@ -1684,7 +1727,21 @@
         });
 
         // ==================== Lightbox Functions ====================
+        function updateLightboxTransform() {
+            lightboxImage.style.transform = `translate(${currentPanX}px, ${currentPanY}px) scale(${lightboxScale})`;
+        }
+
+        function resetLightboxTransform() {
+            lightboxScale = 1;
+            currentPanX = 0;
+            currentPanY = 0;
+            updateLightboxTransform();
+        }
+
         function openLightbox(images, index) {
+            resetLightboxTransform();
+            lightboxImage.style.cursor = 'grab';
+
             currentLightboxImages = images;
             currentLightboxIndex = index;
             updateLightboxImage();
@@ -1704,13 +1761,17 @@
         }
 
         function showPrevLightboxImage() {
+            if (currentLightboxImages.length <= 1) return;
             currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length;
             updateLightboxImage();
+            resetLightboxTransform();
         }
 
         function showNextLightboxImage() {
+            if (currentLightboxImages.length <= 1) return;
             currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length;
             updateLightboxImage();
+            resetLightboxTransform();
         }
 
 
@@ -1739,28 +1800,50 @@
         }
 
         async function updateNotificationCount() {
-            if (!supabase) return;
+            if (!supabase || !currentUserId) return;
             try {
+                // 1. Get all notifications
                 const { data: notifications, error } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-                const unreadNotifications = notifications.filter(notif => !readNotificationIds[notif.id]);
+
+                const commentIds = notifications.map(n => n.comment_id);
+                if (commentIds.length === 0) {
+                    notificationCountSpan.textContent = 0;
+                    notificationCountSpan.classList.add('hidden');
+                    renderNotifications([]);
+                    return;
+                }
+
+                // 2. Get comments to find authors
+                const { data: comments, error: commentsError } = await supabase.from('comments').select('id, user_id').in('id', commentIds);
+                if (commentsError) throw commentsError;
+
+                const commentAuthorMap = new Map(comments.map(c => [c.id, c.user_id]));
+
+                // 3. Filter out notifications for own comments
+                const filteredNotifications = notifications.filter(notif => {
+                    const authorId = commentAuthorMap.get(notif.comment_id);
+                    return authorId !== currentUserId;
+                });
+
+                const unreadNotifications = filteredNotifications.filter(notif => !readNotificationIds[notif.id]);
                 const count = unreadNotifications.length;
                 notificationCountSpan.textContent = count;
                 notificationCountSpan.classList.toggle('hidden', count === 0);
-                renderNotifications(notifications);
+                renderNotifications(unreadNotifications);
             } catch (err) {
                 console.error('Error in updateNotificationCount:', err);
             }
         }
 
+
         function renderNotifications(notifications) {
             notificationListContent.innerHTML = '';
-            const unreadNotifications = notifications.filter(notif => !readNotificationIds[notif.id]);
-            if (unreadNotifications.length === 0) {
+            if (notifications.length === 0) {
                 notificationListContent.innerHTML = '<p class="text-center text-sm theme-text-subtitle py-4">새로운 알림이 없습니다.</p>';
                 return;
             }
-            unreadNotifications.forEach(notif => {
+            notifications.forEach(notif => {
                 const item = document.createElement('div');
                 item.className = `notification-item unread`;
                 item.dataset.notificationId = notif.id;
@@ -1787,14 +1870,9 @@
                 updateNotificationCount();
             }
             switchTab('community');
-            const targetToggleBtn = document.getElementById(boardType === 'restaurant_comments' ? 'toggle-restaurant-comments' : 'toggle-general-comments');
-            const targetContainer = document.getElementById(boardType === 'restaurant_comments' ? 'restaurant-comments-container' : 'general-comments-container');
-            if (targetToggleBtn && targetContainer) {
-                if (!targetContainer.classList.contains('open')) {
-                    targetToggleBtn.click();
-                }
-                targetToggleBtn.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            
+            const targetBoard = boardType === 'restaurant_comments' ? 'restaurant' : 'general';
+            document.querySelector(`.board-tab[data-board="${targetBoard}"]`).click();
         }
 
         async function deleteAllNotifications() {
@@ -1802,10 +1880,12 @@
             const confirmed = await showCustomConfirm('모든 알림을 삭제하시겠습니까?');
             if (!confirmed) return;
             try {
-                const { error } = await supabase.from('notifications').delete().not('id', 'is', null);
+                // This is a bit broad, ideally we'd delete only notifications for the current user.
+                // For now, we mark all as read.
+                const { data: notifications, error } = await supabase.from('notifications').select('id');
                 if (error) throw error;
-                localStorage.removeItem(`readNotifications_${currentUserId}`);
-                readNotificationIds = {};
+                notifications.forEach(n => readNotificationIds[n.id] = true);
+                saveReadStatus();
                 updateNotificationCount();
                 notificationPanel.classList.remove('open');
             } catch (err) {
@@ -1932,6 +2012,56 @@
             lightboxPrev.addEventListener('click', showPrevLightboxImage);
             lightboxNext.addEventListener('click', showNextLightboxImage);
 
+            // NEW: Keyboard navigation for lightbox
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('hidden')) {
+                    if (e.key === 'Escape') closeLightbox();
+                    if (e.key === 'ArrowLeft') showPrevLightboxImage();
+                    if (e.key === 'ArrowRight') showNextLightboxImage();
+                }
+            });
+
+            // NEW: Mouse wheel zoom for lightbox
+            lightbox.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const scaleAmount = 0.1;
+                if (e.deltaY < 0) { // Zoom in
+                    lightboxScale += scaleAmount;
+                } else { // Zoom out
+                    lightboxScale -= scaleAmount;
+                }
+                lightboxScale = Math.min(Math.max(0.5, lightboxScale), 3); // Clamp scale
+                updateLightboxTransform();
+            });
+
+            // NEW: Panning logic
+            lightboxImage.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Left mouse button
+                    isPanning = true;
+                    startPanX = e.clientX - currentPanX;
+                    startPanY = e.clientY - currentPanY;
+                    lightboxImage.style.cursor = 'grabbing';
+                }
+            });
+
+            lightbox.addEventListener('mousemove', (e) => {
+                if (isPanning) {
+                    currentPanX = e.clientX - startPanX;
+                    currentPanY = e.clientY - startPanY;
+                    updateLightboxTransform();
+                }
+            });
+
+            lightbox.addEventListener('mouseup', () => {
+                isPanning = false;
+                lightboxImage.style.cursor = 'grab';
+            });
+            lightbox.addEventListener('mouseleave', () => {
+                isPanning = false;
+                lightboxImage.style.cursor = 'grab';
+            });
+
+
             // --- User Auth ---
             let { data: { user } } = await supabase.auth.getUser();
             if (!user) {
@@ -2043,15 +2173,26 @@
             });
             
             // --- Comment Section Initialization ---
-            const toggleRestaurantBtn = document.getElementById('toggle-restaurant-comments');
-            const restaurantCommentsContainer = document.getElementById('restaurant-comments-container');
+            const boardTabs = document.querySelectorAll('.board-tab');
+            const boardContents = document.querySelectorAll('.board-content');
+
+            boardTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    boardTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const boardType = tab.dataset.board;
+                    boardContents.forEach(content => {
+                        content.classList.toggle('hidden', content.id !== `${boardType}-board-content`);
+                    });
+                });
+            });
+
             restaurantCommentList = document.getElementById('restaurant-comment-list');
             restaurantNicknameInput = document.getElementById('restaurant-nickname-input');
             const restaurantCommentInput = document.getElementById('restaurant-comment-input');
             const restaurantCommentPostBtn = document.getElementById('restaurant-comment-post-btn');
 
-            const toggleGeneralBtn = document.getElementById('toggle-general-comments');
-            const generalCommentsContainer = document.getElementById('general-comments-container');
             generalCommentList = document.getElementById('general-comment-list');
             generalNicknameInput = document.getElementById('general-nickname-input');
             const generalCommentInput = document.getElementById('general-comment-input');
@@ -2068,14 +2209,15 @@
                         rootComments.push(commentMap.get(c.id));
                     }
                 });
-                rootComments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                // Root comments are already sorted by created_at desc from the query
                 rootComments.forEach(c => c.replies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)));
                 return rootComments;
             }
 
             function renderComment(comment, container, isReply = false) {
                 const item = document.createElement('div');
-                item.className = `comment-item ${isReply ? 'reply-item' : ''}`;
+                const isMyComment = comment.user_id === currentUserId;
+                item.className = `comment-item ${isReply ? 'reply-item' : ''} ${isMyComment ? 'my-comment' : ''}`;
                 item.dataset.commentId = comment.id;
                 item.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
@@ -2105,7 +2247,7 @@
                     };
                     actionsDiv.appendChild(replyBtn);
                 }
-                if (currentUserId && comment.user_id === currentUserId) {
+                if (isMyComment) {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.className = 'text-xs text-red-400 hover:text-red-200 font-semibold ml-2 comment-delete-btn';
                     deleteBtn.textContent = '삭제';
@@ -2122,21 +2264,35 @@
                     `;
                     const postReplyBtn = replyForm.querySelector('.post-reply-btn');
                     postReplyBtn.addEventListener('click', async () => {
-                        await postBoardComment(comment.board_type, replyForm.querySelector('.reply-nickname-input'), replyForm.querySelector('.reply-text-input'), comment.id);
-                        replyForm.classList.remove('open');
+                        const nickInput = replyForm.querySelector('.reply-nickname-input');
+                        const textInput = replyForm.querySelector('.reply-text-input');
+                        await postBoardComment(comment.board_type, nickInput, textInput, comment.id);
+                        textInput.value = '';
                     });
                     item.appendChild(replyForm);
                 }
                 if (comment.replies && comment.replies.length > 0) {
                     const repliesContainer = document.createElement('div');
-                    repliesContainer.className = 'replies-container mt-3 space-y-2';
+                    const shouldBeOpen = openReplyContainers.has(comment.id);
+                    repliesContainer.className = `replies-container mt-3 space-y-2 ${shouldBeOpen ? 'open' : ''}`;
+                    
                     const repliesToggle = document.createElement('div');
                     repliesToggle.className = 'flex justify-between items-center cursor-pointer text-sm theme-text-subtitle py-2';
-                    repliesToggle.innerHTML = `<span>답글 ${comment.replies.length}개 보기</span><svg class="w-4 h-4 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    
+                    const svgRotation = shouldBeOpen ? 'rotate-180' : '';
+                    const toggleText = shouldBeOpen ? `답글 ${comment.replies.length}개 숨기기` : `답글 ${comment.replies.length}개 보기`;
+                    
+                    repliesToggle.innerHTML = `<span>${toggleText}</span><svg class="w-4 h-4 transform transition-transform ${svgRotation}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>`;
+                    
                     repliesToggle.onclick = () => {
-                        repliesContainer.classList.toggle('open');
+                        const isOpen = repliesContainer.classList.toggle('open');
                         repliesToggle.querySelector('svg').classList.toggle('rotate-180');
-                        repliesToggle.querySelector('span').textContent = repliesContainer.classList.contains('open') ? `답글 ${comment.replies.length}개 숨기기` : `답글 ${comment.replies.length}개 보기`;
+                        repliesToggle.querySelector('span').textContent = isOpen ? `답글 ${comment.replies.length}개 숨기기` : `답글 ${comment.replies.length}개 보기`;
+                        if (isOpen) {
+                            openReplyContainers.add(comment.id);
+                        } else {
+                            openReplyContainers.delete(comment.id);
+                        }
                     };
                     comment.replies.forEach(reply => renderComment(reply, repliesContainer, true));
                     item.appendChild(repliesContainer);
@@ -2151,20 +2307,74 @@
                 if (error) console.error('Error deleting comment:', error);
                 else {
                     await supabase.from('notifications').delete().eq('comment_id', commentId);
-                    if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList);
-                    else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList);
+                    if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList, restaurantCommentsCurrentPage);
+                    else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList, generalCommentsCurrentPage);
                     updateNotificationCount();
                 }
             }
 
-            const fetchAndRenderBoardComments = async (boardType, listEl) => {
-                const { data, error } = await supabase.from('comments').select('*').eq('board_type', boardType).order('created_at', { ascending: true });
+            const fetchAndRenderBoardComments = async (boardType, listEl, page = 1) => {
+                const from = (page - 1) * COMMENTS_PER_PAGE;
+                const to = from + COMMENTS_PER_PAGE - 1;
+
+                const { data, error, count } = await supabase
+                    .from('comments')
+                    .select('*', { count: 'exact' })
+                    .eq('board_type', boardType)
+                    .is('parent_id', null) // Only paginate root comments
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
+
                 if (error) {
                     listEl.innerHTML = `<p class="text-sm text-red-400 text-center">댓글 로딩 오류: ${error.message}</p>`;
                     return;
                 }
+
+                const rootCommentIds = data.map(c => c.id);
+                if (rootCommentIds.length > 0) {
+                    const { data: replies, error: repliesError } = await supabase
+                        .from('comments')
+                        .select('*')
+                        .in('parent_id', rootCommentIds)
+                        .order('created_at', { ascending: true });
+                    
+                    if(repliesError) {
+                        console.error("Error fetching replies:", repliesError);
+                    } else {
+                        data.forEach(rootComment => {
+                            rootComment.replies = replies.filter(reply => reply.parent_id === rootComment.id);
+                        });
+                    }
+                }
+
                 listEl.innerHTML = (!data || data.length === 0) ? '<p class="text-sm theme-text-subtitle text-center">첫 댓글을 남겨보세요!</p>' : '';
-                buildCommentTree(data).forEach(c => renderComment(c, listEl));
+                data.forEach(c => renderComment(c, listEl));
+
+                renderPaginationControls(boardType, count, page);
+            };
+            
+            const renderPaginationControls = (boardType, totalComments, currentPage) => {
+                const paginationEl = document.getElementById(`${boardType.split('_')[0]}-pagination`);
+                paginationEl.innerHTML = '';
+                const totalPages = Math.ceil(totalComments / COMMENTS_PER_PAGE);
+
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = i;
+                    pageBtn.className = `pagination-btn w-8 h-8 rounded-md font-semibold text-sm ${i === currentPage ? 'active' : ''}`;
+                    pageBtn.onclick = () => {
+                        if (boardType === 'general_comments') {
+                            generalCommentsCurrentPage = i;
+                            fetchAndRenderBoardComments('general_comments', generalCommentList, i);
+                        } else {
+                            restaurantCommentsCurrentPage = i;
+                            fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList, i);
+                        }
+                    };
+                    paginationEl.appendChild(pageBtn);
+                }
             };
 
             const postBoardComment = async (boardType, nickInput, commentInput, parentId = null) => {
@@ -2177,25 +2387,15 @@
                         if (data && data.length > 0) {
                             await supabase.from('notifications').insert({ comment_id: data[0].id, comment_text: data[0].text, commenter_nickname: data[0].nickname, board_type: data[0].board_type });
                         }
-                        if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList);
-                        else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList);
+                        if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList, 1);
+                        else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList, 1);
                     }
                 }
             };
 
-            toggleRestaurantBtn.addEventListener('click', () => {
-                const isOpen = restaurantCommentsContainer.classList.toggle('open');
-                toggleRestaurantBtn.querySelector('svg').classList.toggle('rotate-180');
-                if (isOpen) fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList);
-            });
             restaurantCommentPostBtn.addEventListener('click', () => postBoardComment('restaurant_comments', restaurantNicknameInput, restaurantCommentInput));
             restaurantCommentInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); restaurantCommentPostBtn.click(); } });
 
-            toggleGeneralBtn.addEventListener('click', () => {
-                const isOpen = generalCommentsContainer.classList.toggle('open');
-                toggleGeneralBtn.querySelector('svg').classList.toggle('rotate-180');
-                if (isOpen) fetchAndRenderBoardComments('general_comments', generalCommentList);
-            });
             generalCommentPostBtn.addEventListener('click', () => postBoardComment('general_comments', generalNicknameInput, generalCommentInput));
             generalCommentInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generalCommentPostBtn.click(); } });
 
@@ -2243,8 +2443,8 @@
             
             createSubscription('comments', payload => {
                 const boardType = payload.new?.board_type || payload.old?.board_type;
-                if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList);
-                else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList);
+                if (boardType === 'restaurant_comments') fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList, restaurantCommentsCurrentPage);
+                else if (boardType === 'general_comments') fetchAndRenderBoardComments('general_comments', generalCommentList, generalCommentsCurrentPage);
             });
             createSubscription('notifications', () => updateNotificationCount());
             createSubscription('restaurant_reviews', () => { updateSikdaeList(); updateGangnamList(); updatePubList(); });
@@ -2268,6 +2468,8 @@
             updateSikdaeList();
             updateGangnamList();
             updatePubList();
+            fetchAndRenderBoardComments('general_comments', generalCommentList, 1);
+            fetchAndRenderBoardComments('restaurant_comments', restaurantCommentList, 1);
         });
     </script>
 </body>
