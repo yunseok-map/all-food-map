@@ -7,7 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
-import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
+import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './components/restaurantCard.js';
 
 let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
@@ -393,8 +393,6 @@ async function postReview(button) {
     nicknameInput.value = '';
     reviewTextInput.value = '';
     renderStarRatingInput(starsInputContainer, restaurantId);
-    // 실시간 구독이 리뷰 목록을 업데이트하므로 아래 줄은 필요 없을 수 있지만,
-    // 즉각적인 피드백을 위해 남겨두는 것이 사용자 경험에 좋습니다.
     await fetchAndRenderReviews(restaurantId, reviewSection.querySelector('.reviews-list'));
 }
 
@@ -543,6 +541,59 @@ function handleLightboxKeyPress(e) {
 
 // --- UI 업데이트 헬퍼 ---
 
+async function updateCardInteraction(placeId, placeType) {
+    // 1. 최신 '좋아요'/'싫어요' 개수 가져오기
+    const { data: updatedCounts, error: countError } = await api.supabase
+        .from('user_place_interactions')
+        .select('interaction_type')
+        .eq('place_id', placeId)
+        .eq('place_type', placeType);
+
+    if (countError) {
+        console.error('Error fetching interaction counts:', countError);
+        return;
+    }
+
+    const likes = updatedCounts.filter(i => i.interaction_type === 'like').length;
+    const dislikes = updatedCounts.filter(i => i.interaction_type === 'dislike').length;
+
+    // 2. 현재 사용자의 상호작용 정보 가져오기 (버튼 색상 변경용)
+    const { data: userInteraction } = await api.supabase
+        .from('user_place_interactions')
+        .select('interaction_type')
+        .eq('user_id', api.currentUserId)
+        .eq('place_id', placeId)
+        .eq('place_type', placeType)
+        .single();
+    
+    // 3. 페이지에 있는 모든 관련 카드를 찾아서 UI 업데이트
+    document.querySelectorAll(`[data-restaurant-id="${placeId}"]`).forEach(card => {
+        const likeCountSpan = card.querySelector('.like-count');
+        const dislikeCountSpan = card.querySelector('.dislike-count');
+        const likeButton = card.querySelector('.like-button');
+        const dislikeButton = card.querySelector('.dislike-button');
+        const headerLikeCountSpan = card.querySelector('.header-like-count');
+        const headerDislikeCountSpan = card.querySelector('.header-dislike-count');
+
+        // 버튼 안의 숫자 업데이트
+        if (likeCountSpan) likeCountSpan.textContent = likes;
+        if (dislikeCountSpan) dislikeCountSpan.textContent = dislikes;
+        
+        // 카드 헤더의 숫자도 업데이트
+        if (headerLikeCountSpan) headerLikeCountSpan.textContent = ` ${likes}`;
+        if (headerDislikeCountSpan) headerDislikeCountSpan.textContent = ` ${dislikes}`;
+
+        // 버튼 스타일 업데이트
+        if (likeButton && dislikeButton) {
+            const isLiked = userInteraction?.interaction_type === 'like';
+            const isDisliked = userInteraction?.interaction_type === 'dislike';
+
+            likeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isLiked ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`;
+            dislikeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isDisliked ? 'bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`;
+        }
+    });
+}
+
 function updateListForActiveTab() {
     const activeSubTab = document.querySelector('.sub-tab-btn.active')?.dataset.subTab;
     if (!activeSubTab) return;
@@ -610,4 +661,3 @@ function setupFilterListeners(pageType, updateFunction) {
     if(priceFilter) priceFilter.addEventListener('change', updateFunction);
     if(sortOrder) sortOrder.addEventListener('change', updateFunction);
 }
-
