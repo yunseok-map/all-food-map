@@ -99,11 +99,13 @@ async function loadInitialData() {
 }
 
 function setupRealtimeSubscriptions() {
-    // *** FIX: 댓글 실시간 업데이트 시 열려있던 답글창 상태 유지 ***
+    // *** FIX: 댓글 실시간 업데이트 시 열려있던 답글창/목록 상태 유지 ***
     api.setupSubscription('comments', async () => {
-        // 현재 열려있는 답글창의 부모 댓글 ID를 저장
+        // 현재 열려있는 UI 상태를 기억
         const openReplyForms = document.querySelectorAll('.reply-form-container.open');
-        const openParentIds = Array.from(openReplyForms).map(form => form.closest('.comment-item').dataset.commentId);
+        const openReplyLists = document.querySelectorAll('.replies-container.open');
+        const openParentIdsForForms = Array.from(openReplyForms).map(form => form.closest('.comment-item').dataset.commentId);
+        const openParentIdsForLists = Array.from(openReplyLists).map(list => list.closest('.comment-item').dataset.commentId);
 
         // 댓글 목록을 다시 그림
         await Promise.all([
@@ -111,12 +113,21 @@ function setupRealtimeSubscriptions() {
             fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage)
         ]);
 
-        // 저장해둔 ID를 기반으로 답글창을 다시 열어줌
-        openParentIds.forEach(id => {
+        // 저장해둔 ID를 기반으로 UI 상태를 복원
+        openParentIdsForForms.forEach(id => {
             const commentItem = document.querySelector(`.comment-item[data-comment-id="${id}"]`);
             if (commentItem) {
                 const form = commentItem.querySelector('.reply-form-container');
                 if (form) form.classList.add('open');
+            }
+        });
+        openParentIdsForLists.forEach(id => {
+            const commentItem = document.querySelector(`.comment-item[data-comment-id="${id}"]`);
+            if (commentItem) {
+                const list = commentItem.querySelector('.replies-container');
+                const button = commentItem.querySelector('.toggle-replies-btn');
+                if (list) list.classList.add('open');
+                if (button) button.textContent = '답글 숨기기';
             }
         });
     });
@@ -134,7 +145,10 @@ function setupRealtimeSubscriptions() {
     api.setupSubscription('user_place_interactions', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
         if (record && record.place_id && record.place_type) {
-            updateCardInteraction(record.place_id, record.place_type);
+            // 다른 사용자의 화면을 업데이트
+            if (record.user_id !== api.currentUserId) {
+                updateCardInteraction(record.place_id, record.place_type);
+            }
         }
     });
     api.setupPresence(userCount => {
@@ -387,6 +401,10 @@ async function handleInteraction(button, interactionType) {
         } else {
             await api.supabase.from('user_place_interactions').insert({ user_id: api.currentUserId, place_id: placeId, place_type: placeType, interaction_type: interactionType });
         }
+        
+        // *** FIX: 클릭한 사용자의 화면을 즉시 업데이트 ***
+        await updateCardInteraction(placeId, placeType);
+
     } catch (error) {
         console.error("Interaction Error:", error);
     } finally {
@@ -466,8 +484,6 @@ async function postBoardComment(button, isReply = false) {
     if (text) {
         await api.postCommentAPI({ nickname: nickInput.value.trim() || '익명', text, parent_id: parentId, board_type: boardType, user_id: api.currentUserId });
         commentInput.value = '';
-        // *** FIX: 답글 등록 후 창이 닫히지 않도록 이 부분을 삭제/주석 처리 ***
-        // if (isReply) form.classList.remove('open');
     }
 }
 
@@ -679,4 +695,3 @@ function setupFilterListeners(pageType, updateFunction) {
     if(priceFilter) priceFilter.addEventListener('change', updateFunction);
     if(sortOrder) sortOrder.addEventListener('change', updateFunction);
 }
-
