@@ -7,8 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
-// *** FIX: import 경로를 올바르게 수정 ***
-import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
+import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './components/restaurantCard.js';
 
 let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
@@ -100,10 +99,28 @@ async function loadInitialData() {
 }
 
 function setupRealtimeSubscriptions() {
-    api.setupSubscription('comments', () => {
-        fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage);
-        fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage);
+    // *** FIX: 댓글 실시간 업데이트 시 열려있던 답글창 상태 유지 ***
+    api.setupSubscription('comments', async () => {
+        // 현재 열려있는 답글창의 부모 댓글 ID를 저장
+        const openReplyForms = document.querySelectorAll('.reply-form-container.open');
+        const openParentIds = Array.from(openReplyForms).map(form => form.closest('.comment-item').dataset.commentId);
+
+        // 댓글 목록을 다시 그림
+        await Promise.all([
+            fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage),
+            fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage)
+        ]);
+
+        // 저장해둔 ID를 기반으로 답글창을 다시 열어줌
+        openParentIds.forEach(id => {
+            const commentItem = document.querySelector(`.comment-item[data-comment-id="${id}"]`);
+            if (commentItem) {
+                const form = commentItem.querySelector('.reply-form-container');
+                if (form) form.classList.add('open');
+            }
+        });
     });
+
     api.setupSubscription('restaurant_reviews', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
         const restaurantId = record.restaurant_id;
@@ -449,7 +466,7 @@ async function postBoardComment(button, isReply = false) {
     if (text) {
         await api.postCommentAPI({ nickname: nickInput.value.trim() || '익명', text, parent_id: parentId, board_type: boardType, user_id: api.currentUserId });
         commentInput.value = '';
-        // *** FIX: 답글 등록 후 창이 닫히지 않도록 이 부분을 주석 처리 또는 삭제 ***
+        // *** FIX: 답글 등록 후 창이 닫히지 않도록 이 부분을 삭제/주석 처리 ***
         // if (isReply) form.classList.remove('open');
     }
 }
