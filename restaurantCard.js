@@ -18,7 +18,7 @@ export function createRestaurantCard(r, pageType, interactionData) {
     item.dataset.restaurantId = r.id;
 
     // --- 이미지 데이터 추출 및 슬라이더 HTML 생성 ---
-    const images = [r.image_url1, r.image_url2, r.image_url3, r.image_url4, r.image_url5].filter(Boolean);
+    const images = [r.image_url, r.image_url2, r.image_url3, r.image_url4, r.image_url5].filter(Boolean);
     let imageSliderHTML = '';
     if (images.length > 0) {
         imageSliderHTML = `
@@ -157,4 +157,5 @@ function renderDisplayedStars(rating) {
     }
     return starsHtml;
 }
+
 
