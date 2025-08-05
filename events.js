@@ -654,5 +654,9 @@ function setupAiButtonListener(pageType) {
 function setupFilterListeners(pageType, updateFunction) {
     const searchInput = document.getElementById(`${pageType}-search-input`);
     const priceFilter = document.getElementById(`${pageType}-price-filter`);
-    const sortOrder = document.getElementById(`${pageType}-sort-order
+    const sortOrder = document.getElementById(`${pageType}-sort-order`);
+    if(searchInput) searchInput.addEventListener('input', updateFunction);
 
+    if(priceFilter) priceFilter.addEventListener('change', updateFunction);
+    if(sortOrder) sortOrder.addEventListener('change', updateFunction);
+}
