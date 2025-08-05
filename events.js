@@ -7,7 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
-import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './components/restaurantCard.js';
+import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
 
 let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
@@ -655,3 +655,4 @@ function setupFilterListeners(pageType, updateFunction) {
     const searchInput = document.getElementById(`${pageType}-search-input`);
     const priceFilter = document.getElementById(`${pageType}-price-filter`);
     const sortOrder = document.getElementById(`${pageType}-sort-order
+
