@@ -4,7 +4,7 @@
  */
 
 import { currentUserId, fetchInteractions } from './api.js';
-import { createRestaurantCard } from './components/restaurantCard.js';
+import { createRestaurantCard } from './restaurantCard.js';
 
 // --- Utility Functions ---
 
@@ -279,3 +279,4 @@ function applyAuroraMode(isEnabled) {
     const auroraToggleBtn = document.getElementById('aurora-toggle-btn');
     if(auroraToggleBtn) auroraToggleBtn.textContent = isEnabled ? '🎨' : '✨';
 }
+
