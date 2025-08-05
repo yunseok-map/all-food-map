@@ -7,7 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
-import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
+import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './components/restaurantCard.js';
 
 let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
@@ -104,7 +104,8 @@ function setupRealtimeSubscriptions() {
         fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage);
     });
     api.setupSubscription('restaurant_reviews', (payload) => {
-        const restaurantId = payload.new.restaurant_id || payload.old.restaurant_id;
+        const record = payload.new.id ? payload.new : payload.old;
+        const restaurantId = record.restaurant_id;
         if (restaurantId) {
             const reviewsList = document.querySelector(`[data-restaurant-id="${restaurantId}"] .reviews-list`);
             if (reviewsList) {
@@ -112,9 +113,7 @@ function setupRealtimeSubscriptions() {
             }
         }
     });
-    // '좋아요'/'싫어요' 변경이 감지되면 updateCardInteraction 함수를 호출
     api.setupSubscription('user_place_interactions', (payload) => {
-        console.log('Realtime update received:', payload); // 실시간 신호 수신 확인용 로그
         const record = payload.new.id ? payload.new : payload.old;
         if (record && record.place_id && record.place_type) {
             updateCardInteraction(record.place_id, record.place_type);
@@ -129,7 +128,49 @@ function setupRealtimeSubscriptions() {
 // --- 중앙 이벤트 핸들러 (이벤트 위임) ---
 
 async function handleDynamicContentClick(e) {
-    // ... (다른 이벤트 핸들러들은 이전과 동일) ...
+    // 1. 카테고리 아코디언 토글
+    const categoryGroupHeader = e.target.closest('.category-group-header');
+    if (categoryGroupHeader) {
+        const content = categoryGroupHeader.nextElementSibling;
+        content?.classList.toggle('open');
+        categoryGroupHeader.querySelector('svg')?.classList.toggle('rotate-180');
+        return;
+    }
+
+    // 2. 맛집 카드 아코디언 토글
+    const cardHeader = e.target.closest('.card-header');
+    if (cardHeader) {
+        const card = cardHeader.closest('[data-restaurant-id]');
+        const details = card?.querySelector('.details');
+        const restaurantId = card?.dataset.restaurantId;
+        if (details && restaurantId) {
+            details.classList.toggle('open');
+            cardHeader.querySelector('svg')?.classList.toggle('rotate-180');
+            if (details.classList.contains('open')) {
+                await fetchAndRenderReviews(restaurantId, details.querySelector('.reviews-list'));
+                renderStarRatingInput(details.querySelector('.stars-input'), restaurantId);
+            }
+        }
+        return;
+    }
+
+    // 3. 이미지 슬라이더 버튼
+    const sliderBtn = e.target.closest('.slider-btn');
+    if (sliderBtn) {
+        handleSlider(sliderBtn);
+        return;
+    }
+    
+    // 4. 라이트박스 트리거
+    const lightboxTrigger = e.target.closest('.lightbox-trigger');
+    if (lightboxTrigger) {
+        const sliderTrack = lightboxTrigger.closest('.slider-track');
+        const allImageElements = sliderTrack.querySelectorAll('.lightbox-trigger');
+        const images = Array.from(allImageElements).map(img => img.src);
+        const startIndex = Array.from(allImageElements).indexOf(lightboxTrigger);
+        openLightbox(images, startIndex);
+        return;
+    }
 
     // 5. 상호작용 버튼 (좋아요/싫어요)
     const interactionBtn = e.target.closest('.like-button, .dislike-button');
@@ -138,119 +179,29 @@ async function handleDynamicContentClick(e) {
         await handleInteraction(interactionBtn, type);
         return;
     }
-    // ... (다른 이벤트 핸들러들은 이전과 동일) ...
-}
 
-// --- 핸들러 구현 ---
-
-// *** FIX: handleInteraction 함수를 DB 작업만 하도록 단순화 ***
-async function handleInteraction(button, interactionType) {
-    if (!api.currentUserId) return ui.showCustomConfirm('로그인이 필요합니다.');
-    button.disabled = true; // 중복 클릭 방지
-    const placeId = button.dataset.placeId;
-    const placeType = button.dataset.placeType;
-
-    try {
-        const { data: existing } = await api.supabase
-            .from('user_place_interactions')
-            .select('id, interaction_type')
-            .eq('user_id', api.currentUserId)
-            .eq('place_id', placeId)
-            .eq('place_type', placeType)
-            .single();
-        
-        if (existing) {
-            if (existing.interaction_type === interactionType) {
-                if (await ui.showCustomConfirm('취소하시겠습니까?')) {
-                    await api.supabase.from('user_place_interactions').delete().eq('id', existing.id);
-                }
+    // 6. 답글 보기/숨기기 버튼
+    const toggleRepliesBtn = e.target.closest('.toggle-replies-btn');
+    if (toggleRepliesBtn) {
+        const container = toggleRepliesBtn.nextElementSibling;
+        if (container && container.classList.contains('replies-container')) {
+            const isOpen = container.classList.toggle('open');
+            if (isOpen) {
+                toggleRepliesBtn.textContent = '답글 숨기기';
             } else {
-                if (await ui.showCustomConfirm('변경하시겠습니까?')) {
-                    await api.supabase.from('user_place_interactions').update({ interaction_type: interactionType }).eq('id', existing.id);
-                }
+                const replyCount = container.firstElementChild.children.length;
+                toggleRepliesBtn.textContent = `답글 ${replyCount}개 보기`;
             }
-        } else {
-            await api.supabase.from('user_place_interactions').insert({ user_id: api.currentUserId, place_id: placeId, place_type: placeType, interaction_type: interactionType });
         }
-    } catch (error) {
-        console.error("Interaction Error:", error);
-    } finally {
-        // UI 업데이트는 실시간 구독 기능이 처리하므로, 여기서는 버튼만 다시 활성화합니다.
-        // 바로 활성화하면 DB 반영 전에 또 누를 수 있으므로 약간의 딜레이를 줍니다.
-        setTimeout(() => {
-            button.disabled = false;
-        }, 500);
+        return;
     }
-}
 
-
-// *** FIX: 특정 카드 UI만 업데이트하는 함수 (안정성 개선) ***
-async function updateCardInteraction(placeId, placeType) {
-    try {
-        // 1. 최신 '좋아요'/'싫어요' 개수 가져오기
-        const { data: updatedCounts, error: countError } = await api.supabase
-            .from('user_place_interactions')
-            .select('interaction_type', { count: 'exact' })
-            .eq('place_id', placeId)
-            .eq('place_type', placeType);
-
-        if (countError) throw countError;
-
-        const likes = updatedCounts.filter(i => i.interaction_type === 'like').length;
-        const dislikes = updatedCounts.filter(i => i.interaction_type === 'dislike').length;
-
-        // 2. 현재 사용자의 상호작용 정보 가져오기 (버튼 색상 변경용)
-        const { data: userInteraction, error: userInteractionError } = await api.supabase
-            .from('user_place_interactions')
-            .select('interaction_type')
-            .eq('user_id', api.currentUserId)
-            .eq('place_id', placeId)
-            .eq('place_type', placeType)
-            .single();
-        
-        // single()은 데이터가 없으면 에러를 발생시키므로, 에러를 정상 처리합니다.
-        if (userInteractionError && userInteractionError.code !== 'PGRST116') {
-            throw userInteractionError;
-        }
+    // 7. 리뷰 로직
+    if (await handleReviewEvents(e)) return;
     
-        // 3. 페이지에 있는 모든 관련 카드를 찾아서 UI 업데이트
-        const cardsToUpdate = document.querySelectorAll(`[data-restaurant-id="${placeId}"]`);
-        
-        for (const card of cardsToUpdate) {
-            const likeCountSpan = card.querySelector('.like-count');
-            const dislikeCountSpan = card.querySelector('.dislike-count');
-            const likeButton = card.querySelector('.like-button');
-            const dislikeButton = card.querySelector('.dislike-button');
-            const headerLikeCountSpan = card.querySelector('.header-like-count');
-            const headerDislikeCountSpan = card.querySelector('.header-dislike-count');
-
-            // 버튼 안의 숫자 업데이트
-            if (likeCountSpan) likeCountSpan.textContent = likes;
-            if (dislikeCountSpan) dislikeCountSpan.textContent = dislikes;
-            
-            // 카드 헤더의 숫자도 업데이트
-            if (headerLikeCountSpan) headerLikeCountSpan.textContent = ` ${likes}`;
-            if (headerDislikeCountSpan) headerDislikeCountSpan.textContent = ` ${dislikes}`;
-
-            // 버튼 스타일 업데이트
-            if (likeButton && dislikeButton) {
-                const isLiked = userInteraction?.interaction_type === 'like';
-                const isDisliked = userInteraction?.interaction_type === 'dislike';
-
-                likeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isLiked ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`;
-                dislikeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isDisliked ? 'bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`;
-            }
-        }
-    } catch (error) {
-        console.error('Failed to update card interaction UI:', error);
-    }
+    // 8. 게시판 로직
+    if (await handleBoardEvents(e)) return;
 }
-
-// ... (나머지 모든 함수는 이전과 동일하게 유지) ...
-// (handleDrawButtonClick, handleBoardTabClick, postReview 등 모든 함수는 여기에 그대로 있어야 합니다)
-
-// --- (이 아래로 나머지 모든 함수들을 붙여넣으세요) ---
-// (이전 코드에서 복사해서 사용하시면 됩니다)
 
 // --- 개별 이벤트 핸들러 ---
 
@@ -390,6 +341,43 @@ function handleBoardTabClick(tab) {
     });
 }
 
+async function handleInteraction(button, interactionType) {
+    if (!api.currentUserId) return ui.showCustomConfirm('로그인이 필요합니다.');
+    button.disabled = true;
+    const placeId = button.dataset.placeId;
+    const placeType = button.dataset.placeType;
+
+    try {
+        const { data: existing } = await api.supabase
+            .from('user_place_interactions')
+            .select('id, interaction_type')
+            .eq('user_id', api.currentUserId)
+            .eq('place_id', placeId)
+            .eq('place_type', placeType)
+            .single();
+        
+        if (existing) {
+            if (existing.interaction_type === interactionType) {
+                if (await ui.showCustomConfirm('취소하시겠습니까?')) {
+                    await api.supabase.from('user_place_interactions').delete().eq('id', existing.id);
+                }
+            } else {
+                if (await ui.showCustomConfirm('변경하시겠습니까?')) {
+                    await api.supabase.from('user_place_interactions').update({ interaction_type: interactionType }).eq('id', existing.id);
+                }
+            }
+        } else {
+            await api.supabase.from('user_place_interactions').insert({ user_id: api.currentUserId, place_id: placeId, place_type: placeType, interaction_type: interactionType });
+        }
+    } catch (error) {
+        console.error("Interaction Error:", error);
+    } finally {
+        setTimeout(() => {
+            button.disabled = false;
+        }, 300); // 짧은 딜레이 후 버튼 활성화
+    }
+}
+
 async function postReview(button) {
     const reviewSection = button.closest('.review-section');
     const restaurantId = button.dataset.restaurantId;
@@ -408,16 +396,12 @@ async function postReview(button) {
     nicknameInput.value = '';
     reviewTextInput.value = '';
     renderStarRatingInput(starsInputContainer, restaurantId);
-    await fetchAndRenderReviews(restaurantId, reviewSection.querySelector('.reviews-list'));
 }
 
 async function deleteReview(button) {
     const reviewId = button.dataset.reviewId;
-    const card = button.closest('[data-restaurant-id]');
-    const restaurantId = card.dataset.restaurantId;
     if (await ui.showCustomConfirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
         await api.deleteReviewAPI(reviewId);
-        await fetchAndRenderReviews(restaurantId, card.querySelector('.reviews-list'));
     }
 }
 
@@ -556,6 +540,59 @@ function handleLightboxKeyPress(e) {
 
 // --- UI 업데이트 헬퍼 ---
 
+async function updateCardInteraction(placeId, placeType) {
+    try {
+        const { data: updatedCounts, error: countError } = await api.supabase
+            .from('user_place_interactions')
+            .select('interaction_type')
+            .eq('place_id', placeId)
+            .eq('place_type', placeType);
+
+        if (countError) throw countError;
+
+        const likes = updatedCounts.filter(i => i.interaction_type === 'like').length;
+        const dislikes = updatedCounts.filter(i => i.interaction_type === 'dislike').length;
+
+        const { data: userInteraction, error: userInteractionError } = await api.supabase
+            .from('user_place_interactions')
+            .select('interaction_type')
+            .eq('user_id', api.currentUserId)
+            .eq('place_id', placeId)
+            .eq('place_type', placeType)
+            .single();
+        
+        if (userInteractionError && userInteractionError.code !== 'PGRST116') {
+            throw userInteractionError;
+        }
+    
+        const cardsToUpdate = document.querySelectorAll(`[data-restaurant-id="${placeId}"]`);
+        
+        for (const card of cardsToUpdate) {
+            const likeCountSpan = card.querySelector('.like-count');
+            const dislikeCountSpan = card.querySelector('.dislike-count');
+            const likeButton = card.querySelector('.like-button');
+            const dislikeButton = card.querySelector('.dislike-button');
+            const headerLikeCountSpan = card.querySelector('.header-like-count');
+            const headerDislikeCountSpan = card.querySelector('.header-dislike-count');
+
+            if (likeCountSpan) likeCountSpan.textContent = likes;
+            if (dislikeCountSpan) dislikeCountSpan.textContent = dislikes;
+            if (headerLikeCountSpan) headerLikeCountSpan.textContent = ` ${likes}`;
+            if (headerDislikeCountSpan) headerDislikeCountSpan.textContent = ` ${dislikes}`;
+
+            if (likeButton && dislikeButton) {
+                const isLiked = userInteraction?.interaction_type === 'like';
+                const isDisliked = userInteraction?.interaction_type === 'dislike';
+
+                likeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isLiked ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`;
+                dislikeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isDisliked ? 'bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`;
+            }
+        }
+    } catch (error) {
+        console.error('Failed to update card interaction UI:', error);
+    }
+}
+
 function updateListForActiveTab() {
     const activeSubTab = document.querySelector('.sub-tab-btn.active')?.dataset.subTab;
     if (!activeSubTab) return;
@@ -617,9 +654,4 @@ function setupAiButtonListener(pageType) {
 function setupFilterListeners(pageType, updateFunction) {
     const searchInput = document.getElementById(`${pageType}-search-input`);
     const priceFilter = document.getElementById(`${pageType}-price-filter`);
-    const sortOrder = document.getElementById(`${pageType}-sort-order`);
-    if(searchInput) searchInput.addEventListener('input', updateFunction);
-
-    if(priceFilter) priceFilter.addEventListener('change', updateFunction);
-    if(sortOrder) sortOrder.addEventListener('change', updateFunction);
-}
+    const sortOrder = document.getElementById(`${pageType}-sort-order
