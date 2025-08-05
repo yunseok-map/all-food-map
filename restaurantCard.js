@@ -18,7 +18,7 @@ export function createRestaurantCard(r, pageType, interactionData) {
     item.dataset.restaurantId = r.id;
 
     // --- 이미지 데이터 추출 및 슬라이더 HTML 생성 ---
-    const images = [r.image_url, r.image_url2, r.image_url3, r.image_url4, r.image_url5].filter(Boolean);
+    const images = [r.image_url1, r.image_url2, r.image_url3, r.image_url4, r.image_url5].filter(Boolean);
     let imageSliderHTML = '';
     if (images.length > 0) {
         imageSliderHTML = `
@@ -49,8 +49,9 @@ export function createRestaurantCard(r, pageType, interactionData) {
                 <h3 class="font-semibold text-md theme-text-body mr-2">${r.name}</h3>
                 <p class="text-sm theme-text-strong">${r.category || ''}</p>
                 <span class="text-xs ml-3 theme-text-subtitle">
-                    <i class="fas fa-thumbs-up text-blue-400"></i> ${interactionData.likes}
-                    <i class="fas fa-thumbs-down text-red-400 ml-1"></i> ${interactionData.dislikes}
+                    {/* *** FIX: 숫자를 span으로 감싸서 쉽게 찾을 수 있도록 수정 *** */}
+                    <i class="fas fa-thumbs-up text-blue-400"></i><span class="header-like-count"> ${interactionData.likes}</span>
+                    <i class="fas fa-thumbs-down text-red-400 ml-1"></i><span class="header-dislike-count"> ${interactionData.dislikes}</span>
                 </span>
             </div>
             <svg class="w-5 h-5 theme-text-strong transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
