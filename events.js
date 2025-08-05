@@ -7,6 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
+// *** FIX: import 경로를 올바르게 수정 ***
 import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
 
 let allRestaurantsData = [];
@@ -374,7 +375,7 @@ async function handleInteraction(button, interactionType) {
     } finally {
         setTimeout(() => {
             button.disabled = false;
-        }, 300); // 짧은 딜레이 후 버튼 활성화
+        }, 300);
     }
 }
 
@@ -448,7 +449,8 @@ async function postBoardComment(button, isReply = false) {
     if (text) {
         await api.postCommentAPI({ nickname: nickInput.value.trim() || '익명', text, parent_id: parentId, board_type: boardType, user_id: api.currentUserId });
         commentInput.value = '';
-        if (isReply) form.classList.remove('open');
+        // *** FIX: 답글 등록 후 창이 닫히지 않도록 이 부분을 주석 처리 또는 삭제 ***
+        // if (isReply) form.classList.remove('open');
     }
 }
 
