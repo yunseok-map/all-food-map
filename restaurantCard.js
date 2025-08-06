@@ -44,7 +44,8 @@ export function createRestaurantCard(r, pageType, interactionData) {
                         <div class="text-sm theme-text-body">
                             <p>${r.comment || ''}</p>
                             ${r.price ? `<p class="mt-2 font-semibold">가격대: ${r.price}</p>` : ''}
-                            <a href="${r.map_link}" target="_blank" class="map-link font-bold hover:underline mt-2 inline-block">네이버 지도에서 보기 🗺️</a>
+                            <!-- 수정된 부분: r.map_link -> r.mapLink -->
+                            <a href="${r.mapLink}" target="_blank" class="map-link font-bold hover:underline mt-2 inline-block">네이버 지도에서 보기 🗺️</a>
                         </div>
                     </div>
                     ${images.length > 0 ? `
@@ -132,7 +133,6 @@ export async function fetchAndRenderReviews(restaurantId, reviewsListElement) {
                     ${isMyReview ? `<button class="review-delete-btn text-xs text-red-400" data-review-id="${review.id}">삭제</button>` : ''}
                 </div>
             </div>
-            <!-- 수정된 부분: text-left 클래스 추가 -->
             <p class="text-sm theme-text-body text-left">${review.review_text}</p>
         `;
         reviewsListElement.appendChild(reviewItem);
