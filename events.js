@@ -7,7 +7,7 @@
 import * as api from './api.js';
 import * as ui from './ui.js';
 import { sikdaeCategoryOrder, gangnamCategoryOrder, pubCategoryOrder, COMMENTS_PER_PAGE } from './config.js';
-import { fetchAndRenderReviews, renderStarRatingInput, createRestaurantCard } from './restaurantCard.js';
+import { fetchAndRenderReviews, renderStarRatingInput } from './restaurantCard.js';
 
 let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
@@ -141,7 +141,9 @@ function setupRealtimeSubscriptions() {
     api.setupSubscription('user_place_interactions', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
         if (record && record.place_id && record.place_type) {
-            updateCardInteraction(record.place_id, record.place_type);
+            if (record.user_id !== api.currentUserId) {
+                updateCardInteraction(record.place_id, record.place_type);
+            }
         }
     });
     api.setupPresence(userCount => {
@@ -153,7 +155,6 @@ function setupRealtimeSubscriptions() {
 // --- 중앙 이벤트 핸들러 (이벤트 위임) ---
 
 async function handleDynamicContentClick(e) {
-    // 1. 카테고리 아코디언 토글
     const categoryGroupHeader = e.target.closest('.category-group-header');
     if (categoryGroupHeader) {
         const content = categoryGroupHeader.nextElementSibling;
@@ -162,7 +163,6 @@ async function handleDynamicContentClick(e) {
         return;
     }
 
-    // 2. 맛집 카드 아코디언 토글
     const cardHeader = e.target.closest('.card-header');
     if (cardHeader) {
         const card = cardHeader.closest('[data-restaurant-id]');
@@ -172,21 +172,28 @@ async function handleDynamicContentClick(e) {
             details.classList.toggle('open');
             cardHeader.querySelector('svg')?.classList.toggle('rotate-180');
             if (details.classList.contains('open')) {
+                // 리뷰 섹션이 열릴 때 리뷰를 로드하고 별점 입력을 렌더링
                 await fetchAndRenderReviews(restaurantId, details.querySelector('.reviews-list'));
-                renderStarRatingInput(details.querySelector('.stars-input'), restaurantId);
+                renderStarRatingInput(details.querySelector('.stars-input'));
             }
         }
         return;
     }
+    
+    const reviewHeader = e.target.closest('.review-section-header');
+    if (reviewHeader) {
+        const content = reviewHeader.nextElementSibling;
+        content?.classList.toggle('open');
+        reviewHeader.querySelector('svg')?.classList.toggle('rotate-180');
+        return;
+    }
 
-    // 3. 이미지 슬라이더 버튼
     const sliderBtn = e.target.closest('.slider-btn');
     if (sliderBtn) {
         handleSlider(sliderBtn);
         return;
     }
     
-    // 4. 라이트박스 트리거
     const lightboxTrigger = e.target.closest('.lightbox-trigger');
     if (lightboxTrigger) {
         const sliderTrack = lightboxTrigger.closest('.slider-track');
@@ -197,7 +204,6 @@ async function handleDynamicContentClick(e) {
         return;
     }
 
-    // 5. 상호작용 버튼 (좋아요/싫어요)
     const interactionBtn = e.target.closest('.like-button, .dislike-button');
     if (interactionBtn) {
         const type = interactionBtn.classList.contains('like-button') ? 'like' : 'dislike';
@@ -205,26 +211,17 @@ async function handleDynamicContentClick(e) {
         return;
     }
 
-    // 6. 답글 보기/숨기기 버튼
     const toggleRepliesBtn = e.target.closest('.toggle-replies-btn');
     if (toggleRepliesBtn) {
         const container = toggleRepliesBtn.nextElementSibling;
         if (container && container.classList.contains('replies-container')) {
             const isOpen = container.classList.toggle('open');
-            if (isOpen) {
-                toggleRepliesBtn.textContent = '답글 숨기기';
-            } else {
-                const replyCount = container.firstElementChild.children.length;
-                toggleRepliesBtn.textContent = `답글 ${replyCount}개 보기`;
-            }
+            toggleRepliesBtn.textContent = isOpen ? '답글 숨기기' : `답글 ${container.querySelector('.replies-list').children.length}개 보기`;
         }
         return;
     }
 
-    // 7. 리뷰 로직
     if (await handleReviewEvents(e)) return;
-    
-    // 8. 게시판 로직
     if (await handleBoardEvents(e)) return;
 }
 
@@ -325,8 +322,7 @@ async function handleDrawButtonClick(e) {
     }
 
     const selected = [...restaurants].sort(() => 0.5 - Math.random()).slice(0, 2);
-    resultContainer.innerHTML = '';
-
+    
     const placeIds = selected.map(r => r.id);
     const { data: interactions } = await api.fetchInteractions(placeIds, 'community');
     const interactionsMap = new Map();
@@ -345,13 +341,7 @@ async function handleDrawButtonClick(e) {
         });
     }
 
-    selected.forEach((r, index) => {
-        const interactionData = interactionsMap.get(r.id) || { likes: 0, dislikes: 0, currentUserInteraction: null };
-        const card = createRestaurantCard(r, 'community', interactionData);
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.classList.add('card-enter');
-        resultContainer.appendChild(card);
-    });
+    ui.renderCommunityDrawResults(selected, interactionsMap);
 
     btn.disabled = false;
 }
@@ -367,14 +357,10 @@ function handleBoardTabClick(tab) {
 }
 
 async function handleInteraction(button, interactionType) {
-    if (!api.currentUserId) {
-        ui.showCustomConfirm('로그인이 필요합니다.');
-        return;
-    }
-
+    if (!api.currentUserId) return ui.showCustomConfirm('로그인이 필요합니다.');
+    button.disabled = true;
     const placeId = button.dataset.placeId;
     const placeType = button.dataset.placeType;
-    button.disabled = true; // Disable button immediately
 
     try {
         const { data: existing } = await api.supabase
@@ -384,60 +370,31 @@ async function handleInteraction(button, interactionType) {
             .eq('place_id', placeId)
             .eq('place_type', placeType)
             .single();
-
-        let interactionChanged = false;
-
+        
         if (existing) {
-            // 이미 상호작용이 있는 경우 (취소 또는 변경)
-            const message = existing.interaction_type === interactionType ? '취소하시겠습니까?' : '변경하시겠습니까?';
-            const confirmed = await ui.showCustomConfirm(message);
-            
-            if (confirmed) {
-                if (existing.interaction_type === interactionType) {
+            if (existing.interaction_type === interactionType) {
+                if (await ui.showCustomConfirm('취소하시겠습니까?')) {
                     await api.supabase.from('user_place_interactions').delete().eq('id', existing.id);
-                } else {
+                }
+            } else {
+                if (await ui.showCustomConfirm('변경하시겠습니까?')) {
                     await api.supabase.from('user_place_interactions').update({ interaction_type: interactionType }).eq('id', existing.id);
                 }
-                interactionChanged = true;
             }
         } else {
-            // 새로운 상호작용
-            await api.supabase.from('user_place_interactions').insert({
-                user_id: api.currentUserId,
-                place_id: placeId,
-                place_type: placeType,
-                interaction_type: interactionType
-            });
-            interactionChanged = true;
+            await api.supabase.from('user_place_interactions').insert({ user_id: api.currentUserId, place_id: placeId, place_type: placeType, interaction_type: interactionType });
         }
-
-        if (interactionChanged) {
-            await updateCardInteraction(placeId, placeType);
-        }
+        
+        await updateCardInteraction(placeId, placeType);
 
     } catch (error) {
-        // 'single()'이 결과를 찾지 못할 때 발생하는 오류는 정상적인 흐름이므로 무시합니다.
-        if (error.code === 'PGRST116') {
-            try {
-                // 새로운 상호작용을 시도합니다 (위의 로직에서 이미 처리되었을 수 있지만, 안전장치로 추가).
-                await api.supabase.from('user_place_interactions').insert({
-                    user_id: api.currentUserId,
-                    place_id: placeId,
-                    place_type: placeType,
-                    interaction_type: interactionType
-                });
-                await updateCardInteraction(placeId, placeType);
-            } catch (insertError) {
-                console.error("Insert Interaction Error after initial failure:", insertError);
-            }
-        } else {
-            console.error("Interaction Error:", error);
-        }
+        console.error("Interaction Error:", error);
     } finally {
-        button.disabled = false; // Re-enable button in all cases
+        setTimeout(() => {
+            if(document.body.contains(button)) button.disabled = false;
+        }, 300);
     }
 }
-
 
 async function postReview(button) {
     const reviewSection = button.closest('.review-section');
@@ -445,6 +402,7 @@ async function postReview(button) {
     const nicknameInput = reviewSection.querySelector('.review-nickname-input');
     const reviewTextInput = reviewSection.querySelector('.review-text-input');
     const starsInputContainer = reviewSection.querySelector('.stars-input');
+    const reviewsList = reviewSection.querySelector('.reviews-list');
     
     const nickname = nicknameInput.value.trim();
     const reviewText = reviewTextInput.value.trim();
@@ -452,17 +410,34 @@ async function postReview(button) {
 
     if (!reviewText || rating === 0) return alert('별점과 한줄평을 모두 입력해주세요.');
     
-    await api.postReview({ restaurant_id: restaurantId, nickname: nickname || '익명', rating, review_text: reviewText, user_id: api.currentUserId });
+    const { error } = await api.postReview({ restaurant_id: restaurantId, nickname: nickname || '익명', rating, review_text: reviewText, user_id: api.currentUserId });
     
-    nicknameInput.value = '';
-    reviewTextInput.value = '';
-    renderStarRatingInput(starsInputContainer, restaurantId);
+    if (!error) {
+        nicknameInput.value = '';
+        reviewTextInput.value = '';
+        renderStarRatingInput(starsInputContainer);
+        await fetchAndRenderReviews(restaurantId, reviewsList);
+    } else {
+        console.error("Failed to post review:", error);
+        alert("리뷰 등록에 실패했습니다.");
+    }
 }
 
+// 수정된 부분: 삭제 후 즉시 UI 업데이트
 async function deleteReview(button) {
     const reviewId = button.dataset.reviewId;
+    const card = button.closest('[data-restaurant-id]');
+    const restaurantId = card.dataset.restaurantId;
+    const reviewsList = card.querySelector('.reviews-list');
+
     if (await ui.showCustomConfirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-        await api.deleteReviewAPI(reviewId);
+        const { error } = await api.deleteReviewAPI(reviewId);
+        if (!error) {
+            await fetchAndRenderReviews(restaurantId, reviewsList);
+        } else {
+            console.error("Failed to delete review:", error);
+            alert("리뷰 삭제에 실패했습니다.");
+        }
     }
 }
 
@@ -528,20 +503,12 @@ function handleNotificationBellClick() {
 // --- 라이트박스 함수 ---
 function openLightbox(images, startIndex) {
     const lightbox = document.getElementById('image-lightbox');
-    const prevBtn = document.getElementById('lightbox-prev');
-    const nextBtn = document.getElementById('lightbox-next');
-
     lightboxImages = images;
     currentLightboxIndex = startIndex;
     lightboxZoom = 1;
-
-    if (lightboxImages.length <= 1) {
-        prevBtn.style.display = 'none';
-        nextBtn.style.display = 'none';
-    } else {
-        prevBtn.style.display = 'block';
-        nextBtn.style.display = 'block';
-    }
+    
+    document.getElementById('lightbox-prev').style.display = images.length > 1 ? 'block' : 'none';
+    document.getElementById('lightbox-next').style.display = images.length > 1 ? 'block' : 'none';
 
     updateLightboxImage();
     lightbox.classList.remove('hidden');
@@ -549,10 +516,7 @@ function openLightbox(images, startIndex) {
 }
 
 function closeLightbox() {
-    const lightbox = document.getElementById('image-lightbox');
-    lightbox.classList.add('hidden');
-    const img = document.getElementById('lightbox-image');
-    img.style.transform = 'scale(1)';
+    document.getElementById('image-lightbox').classList.add('hidden');
     document.body.style.overflow = '';
 }
 
@@ -583,18 +547,10 @@ function handleLightboxZoom(e) {
 }
 
 function handleLightboxKeyPress(e) {
-    const lightbox = document.getElementById('image-lightbox');
-    if (lightbox.classList.contains('hidden')) {
-        return;
-    }
-
-    if (e.key === 'Escape') {
-        closeLightbox();
-    } else if (e.key === 'ArrowRight') {
-        showNextLightboxImage();
-    } else if (e.key === 'ArrowLeft') {
-        showPrevLightboxImage();
-    }
+    if (document.getElementById('image-lightbox').classList.contains('hidden')) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowRight') showNextLightboxImage();
+    else if (e.key === 'ArrowLeft') showPrevLightboxImage();
 }
 
 
@@ -627,7 +583,7 @@ async function updateCardInteraction(placeId, placeType) {
     
         const cardsToUpdate = document.querySelectorAll(`[data-restaurant-id="${placeId}"]`);
         
-        for (const card of cardsToUpdate) {
+        cardsToUpdate.forEach(card => {
             const likeCountSpan = card.querySelector('.like-count');
             const dislikeCountSpan = card.querySelector('.dislike-count');
             const likeButton = card.querySelector('.like-button');
@@ -637,17 +593,17 @@ async function updateCardInteraction(placeId, placeType) {
 
             if (likeCountSpan) likeCountSpan.textContent = likes;
             if (dislikeCountSpan) dislikeCountSpan.textContent = dislikes;
-            if (headerLikeCountSpan) headerLikeCountSpan.textContent = ` ${likes}`;
-            if (headerDislikeCountSpan) headerDislikeCountSpan.textContent = ` ${dislikes}`;
+            if (headerLikeCountSpan) headerLikeCountSpan.textContent = likes;
+            if (headerDislikeCountSpan) headerDislikeCountSpan.textContent = dislikes;
 
             if (likeButton && dislikeButton) {
                 const isLiked = userInteraction?.interaction_type === 'like';
                 const isDisliked = userInteraction?.interaction_type === 'dislike';
 
-                likeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 like-button ${isLiked ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`;
-                dislikeButton.className = `flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 dislike-button ${isDisliked ? 'bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`;
+                likeButton.className = `like-button flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isLiked ? 'bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`;
+                dislikeButton.className = `dislike-button flex items-center space-x-1 px-3 py-1 rounded-full transition-all duration-300 ease-in-out transform hover:scale-105 ${isDisliked ? 'bg-red-700 text-white' : 'bg-red-500 hover:bg-red-600 text-white'}`;
             }
-        }
+        });
     } catch (error) {
         console.error('Failed to update card interaction UI:', error);
     }
@@ -716,7 +672,6 @@ function setupFilterListeners(pageType, updateFunction) {
     const priceFilter = document.getElementById(`${pageType}-price-filter`);
     const sortOrder = document.getElementById(`${pageType}-sort-order`);
     if(searchInput) searchInput.addEventListener('input', updateFunction);
-
     if(priceFilter) priceFilter.addEventListener('change', updateFunction);
     if(sortOrder) sortOrder.addEventListener('change', updateFunction);
 }
