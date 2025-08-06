@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -233,3 +234,240 @@
     <script type="module" src="main.js"></script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>커뮤니티 맛집/술집 지도</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Hamburger Menu -->
+    <div id="menu-container" class="fixed top-4 left-2 sm:left-4 z-[60]">
+        <button id="menu-toggle-btn" class="control-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div id="menu-panel" class="menu-panel">
+            <button data-tab="community" class="menu-item tab-btn active">커뮤니티</button>
+            <button data-tab="integrated-map" class="menu-item tab-btn">통합지도</button>
+        </div>
+    </div>
+
+    <!-- Special Day Banner -->
+    <div id="special-day-banner" class="hidden">
+        <i class="fas fa-calendar-alt"></i>
+        <span id="special-day-text"></span>
+    </div>
+
+    <!-- Top Right Controls -->
+    <div class="fixed top-4 right-2 sm:right-4 z-50 flex items-center space-x-2">
+        <div id="presence-counter" class="text-sm font-bold py-2 px-4 rounded-full shadow-lg transition-all duration-300"></div>
+        <button id="aurora-toggle-btn" class="control-btn">✨</button>
+        <div class="notification-bell-container">
+            <i id="notification-bell-icon" class="fas fa-bell notification-bell-icon"></i>
+            <span id="notification-count" class="notification-count hidden">0</span>
+            <div id="notification-panel" class="notification-panel">
+                <div class="p-3 text-center theme-text-header font-semibold border-b theme-border flex justify-between items-center">
+                    <span>새로운 댓글 알림</span>
+                    <button id="clear-all-notifications-btn" class="text-xs text-red-400 hover:text-red-200 font-semibold px-2 py-1 rounded-md border border-red-400 hover:border-red-200 transition-colors">모두 삭제</button>
+                </div>
+                <div id="notification-list-content" class="py-2">
+                    <p class="text-center text-sm theme-text-subtitle py-4">새로운 알림이 없습니다.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8 main-content-container">
+        <!-- Main content will be dynamically shown here -->
+        
+        <!-- ==================== Community Page Content ==================== -->
+        <div id="community-content" class="page-content">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold theme-text-title">맛집 커뮤니티</h1>
+                <p class="theme-text-subtitle mt-2 text-sm md:text-base">랜덤 맛집을 뽑아보거나, 자유롭게 이야기를 나눠보세요.</p>
+            </header>
+            <main class="space-y-8 md:space-y-12">
+                <section class="text-center p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">오늘의 메뉴 뽑기 🎉</h2>
+                    <button id="community-draw-btn" class="community-button font-bold text-base md:text-lg px-4 py-2 md:px-6 md:py-3">오늘 뭐 먹지? 😋 (메뉴 뽑기)</button>
+                    <div id="community-result-container" class="mt-6 md:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 min-h-[100px]">
+                        <!-- Drawing results will be displayed here. -->
+                    </div>
+                </section>
+
+                <!-- Community Boards Section -->
+                <section class="p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <nav class="flex border-b theme-border mb-6">
+                        <button data-board="general" class="board-tab py-3 px-6 text-lg font-semibold theme-text-subtitle active">자유 게시판 💬</button>
+                        <button data-board="restaurant" class="board-tab py-3 px-6 text-lg font-semibold theme-text-subtitle">맛집 추천 게시판 🍽️</button>
+                    </nav>
+
+                    <!-- General Comments Board -->
+                    <div id="general-board-content" class="board-content">
+                        <div id="general-comment-list" class="space-y-4 mb-6"></div>
+                        <div id="general-pagination" class="flex justify-center items-center space-x-2 my-4"></div>
+                        <div class="comment-form space-y-2 mt-4">
+                            <input type="text" id="general-nickname-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="닉네임을 입력하세요...">
+                            <textarea id="general-comment-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="자유로운 이야기를 남겨주세요..." rows="3"></textarea>
+                            <button type="button" id="general-comment-post-btn" class="comment-post-btn w-full px-4 py-2 rounded-md font-semibold text-sm">등록</button>
+                        </div>
+                    </div>
+
+                    <!-- Restaurant Comments Board -->
+                    <div id="restaurant-board-content" class="board-content hidden">
+                        <div id="restaurant-comment-list" class="space-y-4 mb-6"></div>
+                        <div id="restaurant-pagination" class="flex justify-center items-center space-x-2 my-4"></div>
+                        <div class="comment-form space-y-2 mt-4">
+                            <input type="text" id="restaurant-nickname-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="닉네임을 입력하세요...">
+                            <textarea id="restaurant-comment-input" class="comment-input w-full p-2 rounded-md border text-sm" placeholder="추천 맛집에 대한 이야기를 남겨주세요..." rows="3"></textarea>
+                            <button type="button" id="restaurant-comment-post-btn" class="comment-post-btn w-full px-4 py-2 rounded-md font-semibold text-sm">등록</button>
+                        </div>
+                    </div>
+                </section>
+            </main>
+            <footer class="text-center mt-8 md:mt-12 text-purple-200 text-xs md:text-sm"><p>모두가 함께 만드는 맛집 지도!</p></footer>
+        </div>
+
+        <!-- ==================== Integrated Map Page Content ==================== -->
+        <div id="integrated-map-content" class="page-content hidden">
+            <header class="text-center mb-6">
+                <h1 class="text-3xl md:text-4xl font-bold theme-text-title">통합 지도</h1>
+                <p class="theme-text-subtitle mt-2 text-sm md:text-base">다양한 카테고리의 맛집과 술집을 한눈에!</p>
+            </header>
+            
+            <!-- Sub-Tab Navigation for Integrated Map -->
+            <nav class="flex flex-wrap justify-center mb-8">
+                <button id="sub-tab-sikdae" data-sub-tab="sikdae" class="sub-tab-btn active">식권대장용</button>
+                <button id="sub-tab-gangnam" data-sub-tab="gangnam" class="sub-tab-btn">강남/신논현</button>
+                <button id="sub-tab-pub" data-sub-tab="pub" class="sub-tab-btn">일하느라 지쳤으니 한 잔</button>
+            </nav>
+
+            <!-- Sub-Content for Sikdae -->
+            <div id="sikdae-sub-content" class="sub-page-content">
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">AI 맛집 추천 🤖</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">식권대장으로 먹고 싶은 메뉴나 상황을 알려주세요!</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <input type="text" id="sikdae-ai-prompt-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none input-field text-sm" placeholder="예: 든든한 한식, 간단한 샌드위치">
+                        <button id="sikdae-ai-recommend-btn" class="ai-button px-4 py-2 md:px-6 md:py-3 rounded-md font-semibold text-sm">추천받기</button>
+                    </div>
+                    <div id="sikdae-ai-result-container" class="mt-4 p-3 md:p-4 rounded-md text-xs md:text-sm theme-text-body ai-result min-h-[50px]"><p>AI의 추천을 기다리고 있어요...</p></div>
+                </section>
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">음식점 검색 및 필터링 🔎</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">가게 이름, 메뉴, 코멘트, 카테고리로 검색하고 가격대로 필터링해보세요.</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+                        <input type="text" id="sikdae-search-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none input-field text-sm" placeholder="예: 돈까스, 순대국밥, 강남역">
+                        <select id="sikdae-price-filter" class="p-2 md:p-3 rounded-md border theme-border input-field text-sm filter-select">
+                            <option value="all">가격대 전체</option>
+                            <option value="under-10000">만원 미만</option>
+                            <option value="10000-20000">만원 ~ 2만원</option>
+                            <option value="20000-30000">2만원 ~ 3만원</option>
+                            <option value="over-30000">3만원 이상</option>
+                        </select>
+                        <select id="sikdae-sort-order" class="p-2 md:p-3 rounded-md border theme-border input-sm filter-select">
+                            <option value="category">카테고리별 정렬</option>
+                            <option value="name-asc">이름 가나다순</option>
+                        </select>
+                    </div>
+                </section>
+                <div id="sikdae-restaurant-sections" class="space-y-3 md:space-y-4"></div>
+                <footer class="text-center mt-8 md:mt-12 text-gray-600 text-xs md:text-sm"><p>식권대장 지도 기반으로 하나하나 취합되어서 누락된 부분이 있을 수도 있습니다.</p></footer>
+            </div>
+
+            <!-- Sub-Content for Gangnam/Sinnonhyeon -->
+            <div id="gangnam-sub-content" class="sub-page-content hidden">
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">AI 맛집 추천 🤖</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">오늘 뭐 먹을지 고민될 때, AI에게 물어보세요! (예: 매콤한 국물, 혼밥하기 좋은 곳)</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <input type="text" id="gangnam-ai-prompt-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none input-field text-sm" placeholder="어떤 음식을 원하세요?">
+                        <button id="gangnam-ai-recommend-btn" class="ai-button px-4 py-2 md:px-6 md:py-3 rounded-md font-semibold text-sm">추천받기</button>
+                    </div>
+                    <div id="gangnam-ai-result-container" class="mt-4 p-3 md:p-4 rounded-md text-xs md:text-sm theme-text-body ai-result min-h-[50px]"><p>AI의 추천을 기다리고 있어요...</p></div>
+                </section>
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">음식점 검색 및 필터링 🔎</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">가게 이름, 메뉴, 코멘트, 카테고리로 검색하고 가격대로 필터링해보세요.</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+                        <input type="text" id="gangnam-search-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none input-field text-sm" placeholder="예: 돈까스, 순대국밥, 강남역">
+                        <select id="gangnam-price-filter" class="p-2 md:p-3 rounded-md border theme-border input-field text-sm filter-select">
+                            <option value="all">가격대 전체</option>
+                            <option value="under-10000">만원 미만</option>
+                            <option value="10000-20000">만원 ~ 2만원</option>
+                            <option value="20000-30000">2만원 ~ 3만원</option>
+                            <option value="over-30000">3만원 이상</option>
+                        </select>
+                        <select id="gangnam-sort-order" class="p-2 md:p-3 rounded-md border theme-border input-field text-sm filter-select">
+                            <option value="category">카테고리별 정렬</option>
+                            <option value="name-asc">이름 가나다순</option>
+                        </select>
+                    </div>
+                </section>
+                <div id="gangnam-restaurant-sections" class="space-y-3 md:space-y-4"></div>
+                <footer class="text-center mt-8 md:mt-12 text-gray-400 text-xs md:text-sm"><p>맛집 데이터 기반으로 제작되었습니다.</p></footer>
+            </div>
+
+            <!-- Sub-Content for Pub Map -->
+            <div id="pub-sub-content" class="sub-page-content hidden">
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">AI 술집 추천 🍻</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">어떤 분위기에서 한 잔 하고 싶으신가요? AI에게 물어보세요!</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        <input type="text" id="pub-ai-prompt-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-purple-400 focus:outline-none input-field text-sm" placeholder="예: 시끌벅적한 맥주집, 조용한 와인바">
+                        <button id="pub-ai-recommend-btn" class="ai-button px-4 py-2 md:px-6 md:py-3 rounded-md font-semibold text-sm">추천받기</button>
+                    </div>
+                    <div id="pub-ai-result-container" class="mt-4 p-3 md:p-4 rounded-md text-xs md:text-sm theme-text-body ai-result min-h-[50px]"><p>AI의 추천을 기다리고 있어요...</p></div>
+                </section>
+                <section class="mb-8 md:mb-10 p-4 sm:p-6 rounded-2xl theme-bg-header shadow-lg">
+                    <h2 class="text-xl md:text-2xl font-bold theme-text-header mb-4">술집 검색 및 필터링 🔍</h2>
+                    <p class="theme-text-subtitle mb-4 text-xs md:text-sm">가게 이름, 메뉴, 분위기, 카테고리로 검색하고 가격대로 필터링해보세요.</p>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+                        <input type="text" id="pub-search-input" class="flex-grow p-2 md:p-3 rounded-md focus:ring-2 focus:ring-purple-400 focus:outline-none input-field text-sm" placeholder="예: 맥주, 칵테일, 강남역">
+                        <select id="pub-price-filter" class="p-2 md:p-3 rounded-md border theme-border input-field text-sm filter-select">
+                            <option value="all">가격대 전체</option>
+                            <option value="under-20000">2만원 미만</option>
+                            <option value="20000-40000">2만원 ~ 4만원</option>
+                            <option value="over-40000">4만원 이상</option>
+                        </select>
+                        <select id="pub-sort-order" class="p-2 md:p-3 rounded-md border theme-border input-field text-sm filter-select">
+                            <option value="category">카테고리별 정렬</option>
+                            <option value="name-asc">이름 가나다순</option>
+                        </select>
+                    </div>
+                </section>
+                <div id="pub-restaurant-sections" class="space-y-3 md:space-y-4"></div>
+                <footer class="text-center mt-8 md:mt-12 text-gray-400 text-xs md:text-sm"><p>신나는 술집 탐방!</p></footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Confirmation Modal -->
+    <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full text-center">
+            <p id="confirm-message" class="text-lg font-semibold text-gray-800 mb-4"></p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirm-yes-btn" class="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors">예</button>
+                <button id="confirm-no-btn" class="px-5 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition-colors">아니오</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image Lightbox Modal -->
+    <div id="image-lightbox" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[100] hidden">
+        <button id="lightbox-close" class="absolute top-5 right-5 text-white text-4xl font-bold hover:text-gray-300">&times;</button>
+        <button id="lightbox-prev" class="absolute left-5 text-white text-4xl p-2 rounded-full hover:bg-black hover:bg-opacity-20">&#10094;</button>
+        <img id="lightbox-image" src="" class="max-w-[90vw] max-h-[90vh] object-contain">
+        <button id="lightbox-next" class="absolute right-5 text-white text-4xl p-2 rounded-full hover:bg-black hover:bg-opacity-20">&#10095;</button>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
+>>>>>>> 8a516bf (실시간 반영 수정)
