@@ -491,3 +491,143 @@ body.theme-pub.aurora-mode {
     background-size: 400% 400%;
     animation: aurora-animation 25s ease infinite;
 }
+/* style.css 파일 맨 아래에 추가 */
+
+/* --- Theme 5: Review Collection (Gray) --- */
+body.theme-review-collection { background: radial-gradient(circle, #4b5563, #1f2937); color: #d1d5db; }
+.theme-review-collection .menu-item.active, .theme-review-collection .sub-tab-btn.active { background-color: #9ca3af; color: #1f2937; }
+.theme-review-collection .menu-item, .theme-review-collection .sub-tab-btn { background-color: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+.theme-review-collection .menu-item:hover, .theme-review-collection .sub-tab-btn:hover { background-color: rgba(156, 163, 175, 0.2); }
+.theme-review-collection .theme-bg-header, .theme-review-collection .theme-bg-card { background-color: rgba(55, 65, 81, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(156, 163, 175, 0.2); border-radius: 1rem; }
+.theme-review-collection .theme-border { border-color: rgba(156, 163, 175, 0.2); }
+.theme-review-collection .theme-text-header, .theme-review-collection .theme-text-strong { color: #e5e7eb; }
+.theme-review-collection .theme-text-title { color: #f9fafb; }
+.theme-review-collection .theme-text-subtitle { color: #d1d5db; }
+.theme-review-collection .theme-text-body { color: #e5e7eb; }
+.theme-review-collection .nickname-tag { background-color: rgba(156, 163, 175, 0.2); color: #e5e7eb; }
+.theme-review-collection #presence-counter, .theme-review-collection .control-btn { background-color: #6b7280; color: white; }
+
+/* --- Review Collection Board Style --- */
+.review-board-container {
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid;
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+    .review-board-container {
+        width: 70%;
+    }
+}
+
+.review-board-header, .review-board-row {
+    display: grid;
+    grid-template-columns: 2fr 4fr 1.5fr 1.5fr; /* Adjust column ratios as needed */
+    align-items: center;
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+}
+
+.review-board-header {
+    font-weight: 700;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid;
+}
+
+.review-board-row {
+    border-bottom: 1px solid;
+}
+
+.review-board-row:last-child {
+    border-bottom: none;
+}
+
+.review-board-cell {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; /* Prevents content from overflowing grid cell */
+}
+.review-board-cell p {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.review-board-cell.review-content {
+    align-items: flex-start;
+}
+
+.review-board-cell.author, .review-board-cell.date {
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.875rem;
+}
+
+/* Apply theme colors */
+.theme-review-collection .review-board-container {
+    border-color: rgba(156, 163, 175, 0.2);
+    background-color: rgba(55, 65, 81, 0.7);
+}
+
+.theme-review-collection .review-board-header {
+    background-color: rgba(75, 85, 99, 0.5);
+    border-color: rgba(156, 163, 175, 0.3);
+    color: #f3f4f6;
+}
+
+.theme-review-collection .review-board-row {
+    border-color: rgba(156, 163, 175, 0.2);
+    transition: background-color 0.2s;
+}
+
+.theme-review-collection .review-board-row:hover {
+    background-color: rgba(156, 163, 175, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .review-board-header {
+        display: none; /* Hide header on small screens */
+    }
+
+    .review-board-row {
+        grid-template-columns: 1fr; /* Stack columns */
+        gap: 0.5rem;
+        padding: 1rem;
+        position: relative;
+    }
+
+    .review-board-cell {
+        display: block;
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+
+    .review-board-cell.restaurant {
+        font-weight: 700; /* This is already bold */
+        font-size: 1.1rem;
+    }
+    
+    .review-board-cell.date {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.75rem;
+    }
+    
+    .review-board-cell.author::before {
+        content: "작성자: ";
+        font-weight: 600;
+        margin-right: 0.5rem;
+        display: inline;
+    }
+    .review-board-cell.author {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+}

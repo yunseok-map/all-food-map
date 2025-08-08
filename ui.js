@@ -241,10 +241,18 @@ export function initializeUI() {
 
 export function switchTab(mainTab) {
     const currentSubTab = document.querySelector('.sub-tab-btn.active')?.dataset.subTab || 'sikdae';
-    const theme = mainTab === 'integrated-map' ? currentSubTab : 'community';
-    const aurora = document.body.classList.contains('aurora-mode');
+
+    let theme = 'community'; // 기본 테마
+    if (mainTab === 'integrated-map') {
+        theme = currentSubTab;
+    } else if (mainTab === 'review-collection') {
+        theme = 'review-collection'; // ▼ 새로운 테마 지정 ▼
+    }
+
     document.body.className = `theme-${theme}`;
-    if (aurora) document.body.classList.add('aurora-mode');
+    if (localStorage.getItem('auroraModeEnabled') === 'true') {
+        document.body.classList.add('aurora-mode');
+    }
 
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === mainTab));
     document.querySelectorAll('.page-content').forEach(content => content.classList.toggle('hidden', content.id !== `${mainTab}-content`));
@@ -272,4 +280,54 @@ export function toggleAuroraMode() {
 function applyAuroraMode(isEnabled) {
     const auroraToggleBtn = document.getElementById('aurora-toggle-btn');
     if(auroraToggleBtn) auroraToggleBtn.textContent = isEnabled ? '🎨' : '✨';
+}
+
+// --- '리뷰 모아보기' 탭을 위한 새로운 함수 (게시판 스타일) ---
+
+export function renderAllReviewsList(container, reviews) {
+    if (!container) return;
+
+    if (reviews.length === 0) {
+        container.innerHTML = '<p class="text-center text-lg theme-text-subtitle mt-8">아직 작성된 리뷰가 없습니다.</p>';
+        return;
+    }
+
+    const renderStars = (rating) => {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            stars += `<span class="text-yellow-400 text-sm">${i <= rating ? '★' : '☆'}</span>`;
+        }
+        return stars;
+    };
+
+    const reviewBoardHTML = `
+        <div class="review-board-container">
+            <div class="review-board-header">
+                <div class="review-board-cell restaurant">가게 이름</div>
+                <div class="review-board-cell review-content">리뷰 내용</div>
+                <div class="review-board-cell author">작성자</div>
+                <div class="review-board-cell date">작성일</div>
+            </div>
+            <div class="review-board-body">
+                ${reviews.map(review => {
+                    const restaurantName = review.restaurants ? review.restaurants.name : '삭제된 가게';
+                    return `
+                        <div class="review-board-row">
+                            <div class="review-board-cell restaurant font-bold">${restaurantName}</div>
+                            <div class="review-board-cell review-content">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    ${renderStars(review.rating)}
+                                </div>
+                                <p class="text-sm theme-text-body">${review.review_text}</p>
+                            </div>
+                            <div class="review-board-cell author">${review.nickname || '익명'}</div>
+                            <div class="review-board-cell date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    `;
+
+    container.innerHTML = reviewBoardHTML;
 }

@@ -27,6 +27,7 @@ export async function initializeApp() {
     ui.initializeUI();
     initializeEventListeners();
     allRestaurantsData = await api.fetchAllRestaurantData();
+    loadAllReviews(); // ▼ 데이터 미리 불러오기 ▼
     loadInitialData();
     setupRealtimeSubscriptions();
 }
@@ -636,6 +637,23 @@ const updatePubList = () => {
     const price = document.getElementById('pub-price-filter').value;
     const sort = document.getElementById('pub-sort-order').value;
     ui.renderRestaurantList(document.getElementById('pub-restaurant-sections'), allRestaurantsData.filter(r => r.source_tab === 'pub'), pubCategoryOrder, 'pub', search, price, sort);
+};
+
+// '리뷰 모아보기' 탭을 위한 새로운 함수 추가
+async function loadAllReviews() {
+    const container = document.getElementById('all-reviews-list');
+    if (!container) return;
+    container.innerHTML = '<p class="text-center theme-text-subtitle">리뷰를 불러오는 중...</p>';
+
+    const { data: reviews, error } = await api.fetchAllReviews();
+
+    if (error) {
+        console.error('Error fetching all reviews:', error.message);
+        container.innerHTML = '<p class="text-center text-red-400">리뷰를 불러오는 데 실패했습니다.</p>';
+        return;
+    }
+
+    ui.renderAllReviewsList(container, reviews);
 };
 
 function setupAiButtonListener(pageType) {

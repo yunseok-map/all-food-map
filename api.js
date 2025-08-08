@@ -223,3 +223,20 @@ export const setupPresence = (callback) => {
         if (status === 'SUBSCRIBED') await presenceChannel.track({ online_at: new Date().toISOString() });
     });
 };
+
+/**
+ * 모든 리뷰를 최신순으로 가져옵니다. (맛집 이름 포함)
+ * @returns {Promise<object>} Supabase 응답 객체
+ */
+export const fetchAllReviews = () => {
+    if (!supabase) return Promise.resolve({ data: [], error: null });
+
+    // restaurants 테이블에서 name 컬럼을 함께 선택(Join) 합니다.
+    return supabase
+        .from('restaurant_reviews')
+        .select(`
+            *,
+            restaurants ( name )
+        `)
+        .order('created_at', { ascending: false });
+}
