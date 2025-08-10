@@ -246,8 +246,11 @@ export function switchTab(mainTab) {
     if (mainTab === 'integrated-map') {
         theme = currentSubTab;
     } else if (mainTab === 'review-collection') {
-        theme = 'review-collection'; // ▼ 새로운 테마 지정 ▼
+        theme = 'review-collection';
+    } else if (mainTab === 'lab') { // ▼ 이 부분을 추가해주세요! ▼
+        theme = 'lab';
     }
+
 
     document.body.className = `theme-${theme}`;
     if (localStorage.getItem('auroraModeEnabled') === 'true') {

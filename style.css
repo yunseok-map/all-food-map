@@ -237,7 +237,7 @@ body {
 
 /* Main Content Container Adjustment */
 .main-content-container {
-    padding-top: 80px;
+    padding-top: 130px !important;
 }
 
 /* --- Image Slider Styles --- */
@@ -507,6 +507,31 @@ body.theme-review-collection { background: radial-gradient(circle, #4b5563, #1f2
 .theme-review-collection .nickname-tag { background-color: rgba(156, 163, 175, 0.2); color: #e5e7eb; }
 .theme-review-collection #presence-counter, .theme-review-collection .control-btn { background-color: #6b7280; color: white; }
 
+/* ... theme-pub ... */
+
+/* ▼ 아래 코드를 통째로 추가해주세요! ▼ */
+/* --- Theme 5: Lab (Teal/Gray) --- */
+body.theme-lab { background: radial-gradient(circle, #134e4a, #111827); color: #ccfbf1; }
+.theme-lab .menu-item.active, .theme-lab .sub-tab-btn.active { background-color: #2dd4bf; color: #042f2e; }
+.theme-lab .menu-item, .theme-lab .sub-tab-btn { background-color: rgba(20, 184, 166, 0.1); color: #5eead4; }
+.theme-lab .menu-item:hover, .theme-lab .sub-tab-btn:hover { background-color: rgba(20, 184, 166, 0.2); }
+.theme-lab .theme-bg-header, .theme-lab .theme-bg-card { background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(45, 212, 191, 0.2); }
+.theme-lab .theme-border, .theme-lab .review-item:not(:last-child) { border-color: rgba(45, 212, 191, 0.2); }
+.theme-lab .comment-item { border-color: rgba(45, 212, 191, 0.2); background-color: rgba(20, 184, 166, 0.05); }
+.theme-lab .comment-item.my-comment { background-color: rgba(20, 184, 166, 0.15); border-color: rgba(45, 212, 191, 0.4); }
+.theme-lab .theme-text-header, .theme-lab .theme-text-strong { color: #5eead4; }
+.theme-lab .theme-text-title { color: #f0fdfa; }
+.theme-lab .theme-text-subtitle { color: #99f6e4; }
+.theme-lab .theme-text-body { color: #ccfbf1; }
+/* ... (나머지 버튼, 인풋 등도 유사하게 청록색 계열로 수정) ... */
+.theme-lab #presence-counter, .theme-lab .control-btn { background-color: #14b8a6; color: white; }
+
+body.theme-lab.aurora-mode {
+    background: linear-gradient(270deg, #134e4a, #0d9488, #2dd4bf, #0f172a);
+    background-size: 400% 400%;
+    animation: aurora-animation 25s ease infinite;
+}
+
 /* --- Review Collection Board Style --- */
 .review-board-container {
     width: 100%;
@@ -631,3 +656,4 @@ body.theme-review-collection { background: radial-gradient(circle, #4b5563, #1f2
         margin-top: 0.5rem;
     }
 }
+

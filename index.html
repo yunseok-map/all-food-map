@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko">   <!-- 테스트-->
 <head>
     <meta charset="UTF-8"> <!--test-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +19,7 @@
             <button data-tab="community" class="menu-item tab-btn active">커뮤니티</button>
             <button data-tab="integrated-map" class="menu-item tab-btn">통합지도</button>
            <button data-tab="review-collection" class="menu-item tab-btn">리뷰 모아보기</button> 
+           <button data-tab="lab" class="menu-item tab-btn">실험실</button>
         </div>
     </div>
 
@@ -215,7 +216,7 @@
     <!-- 새로운 리뷰 페이지 공간 추가-->
      <div id="review-collection-content" class="page-content hidden">
         <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold theme-text-title"전체 리뷰 모아보기</h1>
+            <h1 class="text-3xl md:text-4xl font-bold theme-text-title">전체 리뷰 모아보기</h1>
             <p class="theme-text-subtitle mt-2 textsm md:text-base">모든 맛집의 최신 리뷰를 한눈에 확인하세요~!</p>
         </header>
         <main>
@@ -225,6 +226,20 @@
              </div>
         </main>
      </div>
+
+</main>
+</div>
+
+<div id="lab-content" class="page-content hidden">
+    <header class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-bold theme-text-title">🧪 실험실 🔬</h1>
+        <p class="theme-text-subtitle mt-2 text-sm md:text-base">개발자가 하고싶은 짓 해보는 곳...</p>
+    </header>
+    <main>
+        <p class="text-center theme-text-body">아직은 비어있는 공간입니다. 어떤 신기한 기능을 만들어볼까요?</p>
+    </main>
+</div>
+
 
     <!-- Generic Confirmation Modal -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] hidden">
