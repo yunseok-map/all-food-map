@@ -657,24 +657,82 @@ body.theme-lab.aurora-mode {
     }
 }
 
-/* 기존 CSS 코드들은 이 위에 그대로 둡니다. */
+/* ================================== */
+/* 호버 가능한 기기 전용 스타일 (데스크탑) */
+/* ================================== */
+@media (hover: hover) {
+    .control-btn:hover {
+        transform: scale(1.1);
+    }
+    .comment-post-btn:hover {
+        filter: brightness(1.1);
+    }
+    .comment-item:hover .comment-delete-btn,
+    .review-item:hover .review-delete-btn {
+        opacity: 1;
+    }
+    .slider-btn:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    #lightbox-prev:hover, #lightbox-next:hover {
+        background-color: rgba(0,0,0,0.3);
+    }
+    .notification-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    .review-board-row:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    /* --- 각 테마별 메뉴/탭 호버 효과 --- */
+    .theme-sikdae .menu-item:hover, .theme-sikdae .sub-tab-btn:hover { background-color: rgba(16, 185, 129, 0.2); }
+    .theme-gangnam .menu-item:hover, .theme-gangnam .sub-tab-btn:hover { background-color: rgba(168, 85, 247, 0.2); }
+    .theme-community .menu-item:hover, .theme-community .sub-tab-btn:hover { background-color: rgba(59, 130, 246, 0.2); }
+    .theme-pub .menu-item:hover, .theme-pub .sub-tab-btn:hover { background-color: rgba(249, 115, 22, 0.2); }
+    .theme-lab .menu-item:hover, .theme-lab .sub-tab-btn:hover { background-color: rgba(20, 184, 166, 0.2); }
+    .theme-review-collection .menu-item:hover, .theme-review-collection .sub-tab-btn:hover { background-color: rgba(156, 163, 175, 0.2); }
+    /* --- AI 버튼 호버 --- */
+    .theme-sikdae .ai-button:hover:not(:disabled) { background-color: #059669; }
+    .theme-gangnam .ai-button:hover:not(:disabled) { background-color: #9333ea; }
+    .theme-pub .ai-button:hover:not(:disabled) { background-color: #ea580c; }
+    .theme-community .community-button:hover { background: #1d4ed8; }
+}
 
 /* ================================== */
-/* 모바일 버전 스타일          */
+/* 모바일 화면용 레이아웃 덮어쓰기 */
 /* ================================== */
-
-/* 화면 너비가 768px 이하일 때 적용될 스타일 */
 @media screen and (max-width: 768px) {
-
-  /* 여기에 모바일 화면을 위한 CSS 코드를 작성합니다. */
-  /* 예를 들어, body의 글자 크기를 바꾸는 코드 */
-  body {
-    font-size: 16px;
-  }
-
-  /* PC에서 가로로 배치했던 요소들을 세로로 바꾸는 코드 */
-  .container {
-    flex-direction: column; /* 만약 flexbox를 사용했다면 */
-  }
-
+    .review-board-header {
+        display: none;
+    }
+    .review-board-row {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+        position: relative;
+    }
+    .review-board-cell {
+        display: block;
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+    .review-board-cell.restaurant {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .review-board-cell.date {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.75rem;
+    }
+    .review-board-cell.author::before {
+        content: "작성자: ";
+        font-weight: 600;
+        margin-right: 0.5rem;
+        display: inline;
+    }
+    .review-board-cell.author {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
 }
