@@ -211,35 +211,66 @@
                 <footer class="text-center mt-8 md:mt-12 text-gray-400 text-xs md:text-sm"><p>신나는 술집 탐방!</p></footer>
             </div>
         </div>
+        <!-- ==================== Review Collection Page Content ==================== -->
+        <div id="review-collection-content" class="page-content hidden">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold theme-text-title">전체 리뷰 모아보기</h1>
+                <p class="theme-text-subtitle mt-2 text-sm md:text-base">모든 맛집의 최신 리뷰를 한눈에 확인하세요~!</p>
+            </header>
+            <main>
+                <!-- 리뷰 목록이 여기에 표시됩니다.-->
+                <div id="all-reviews-list" class="space-y-4">
+                    <!-- 로딩 중....-->
+                </div>
+            </main>
+        </div>
+
+        <!-- ==================== Lab Page Content ==================== -->
+        <div id="lab-content" class="page-content hidden">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl md:text-4xl font-bold theme-text-title">🧪 실험실 🔬</h1>
+                <p class="theme-text-subtitle mt-2 text-sm md:text-base">개발자가 하고싶은 짓 해보는 곳...</p>
+            </header>
+            <main>
+                <!-- Lab Sub-Tab Navigation -->
+                <nav class="flex justify-center mb-8">
+                    <button data-lab-tab="gommun" class="lab-sub-tab-btn active">곰문 🐻🚪</button>
+                    <!-- 새로운 실험 탭은 여기에 추가 -->
+                </nav>
+
+                <!-- Lab Sub-Content Container -->
+                <div id="lab-sub-content-container">
+                    <!-- Gommun Content -->
+                    <div id="gommun-content" class="lab-sub-page-content">
+                        <div class="gommun-container">
+                            <input type="checkbox" id="gommun-light-switch" class="hidden"/>
+                            <label for="gommun-light-switch" class="light-switch-label">
+                                <div class="bulb">
+                                    <div class="line"></div>
+                                </div>
+                            </label>
+                            <div class="doorway">
+                                <div class="door">
+                                    <div class="door-panel"></div>
+                                    <div class="door-handle"></div>
+                                </div>
+                            </div>
+                            <!--  fix -->
+                            <!-- '곰' 배우를 무대 뒤(doorway 옆)에 추가합니다. -->
+                            <div class="bear">
+                                <!-- 곰의 팔 역할을 할 div를 추가합니다. -->
+                                <div class="bear-arm"></div>
+                            </div>
+                            <!--  end fix -->
+                        </div>
+                    </div>
+                    <!-- 다른 실험 콘텐츠는 여기에 추가 -->
+                </div>
+            </main>
+        </div>
+
+
     </div>
-
-    <!-- 새로운 리뷰 페이지 공간 추가-->
-     <div id="review-collection-content" class="page-content hidden">
-        <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold theme-text-title">전체 리뷰 모아보기</h1>
-            <p class="theme-text-subtitle mt-2 textsm md:text-base">모든 맛집의 최신 리뷰를 한눈에 확인하세요~!</p>
-        </header>
-        <main>
-            <!-- 리뷰 목록이 여기에 표시됩니다.-->
-             <div id="all-reviews-list" class="space-y-4">
-                <!-- 로딩 중....-->
-             </div>
-        </main>
-     </div>
-
-</main>
-</div>
-
-<div id="lab-content" class="page-content hidden">
-    <header class="text-center mb-10">
-        <h1 class="text-3xl md:text-4xl font-bold theme-text-title">🧪 실험실 🔬</h1>
-        <p class="theme-text-subtitle mt-2 text-sm md:text-base">개발자가 하고싶은 짓 해보는 곳...</p>
-    </header>
-    <main>
-        <p class="text-center theme-text-body">아직은 비어있는 공간입니다. 어떤 신기한 기능을 만들어볼까요?</p>
-    </main>
-</div>
-
 
     <!-- Generic Confirmation Modal -->
     <div id="custom-confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] hidden">

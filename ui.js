@@ -274,6 +274,15 @@ export function switchSubTab(subTab) {
     document.querySelectorAll('.sub-page-content').forEach(content => content.classList.toggle('hidden', content.id !== `${subTab}-sub-content`));
 }
 
+// <!-- fix: Start of changes -->
+export function switchLabSubTab(labTab) {
+    document.querySelectorAll('.lab-sub-tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.labTab === labTab));
+    document.querySelectorAll('.lab-sub-page-content').forEach(content => {
+        content.classList.toggle('hidden', content.id !== `${labTab}-content`);
+    });
+}
+// <!-- fix: End of changes -->
+
 export function toggleAuroraMode() {
     const isEnabled = document.body.classList.toggle('aurora-mode');
     localStorage.setItem('auroraModeEnabled', isEnabled);

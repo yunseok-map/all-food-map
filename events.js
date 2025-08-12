@@ -56,6 +56,14 @@ function initializeEventListeners() {
         updateListForActiveTab();
         btn.blur();
     }));
+    
+    // <!-- fix -->
+    // '실험실' 탭의 서브 탭 버튼에 대한 이벤트 리스너 추가
+    document.querySelectorAll('.lab-sub-tab-btn').forEach(btn => btn.addEventListener('click', () => {
+        ui.switchLabSubTab(btn.dataset.labTab);
+        btn.blur();
+    }));
+    // <!-- end fix -->
 
     document.getElementById('aurora-toggle-btn').addEventListener('click', ui.toggleAuroraMode);
     document.getElementById('community-draw-btn').addEventListener('click', handleDrawButtonClick);
@@ -87,6 +95,11 @@ function initializeEventListeners() {
         setupAiButtonListener(pageType);
         setupFilterListeners(pageType, updateListForActiveTab);
     });
+    
+    // <!-- fix -->
+    // '곰문' 실험실 기능 이벤트 리스너 설정
+    setupGommunLightSwitchListeners();
+    // <!-- end fix -->
 }
 
 async function loadInitialData() {
@@ -114,10 +127,12 @@ async function loadInitialData() {
 }
 
 function setupRealtimeSubscriptions() {
-    // <!-- fix -->
-    // 'comments' 테이블에 변화가 생길 때마다 알람 생성과 게시판 새로고침을 모두 처리합니다.
     api.setupSubscription('comments', (payload) => {
-        // 1. 새 댓글(INSERT)일 경우에만 알람을 생성합니다.
+        // 1. 어떤 변경이든 해당 게시판을 새로고침하기 위해 먼저 필요한 정보를 가져옵니다.
+        const eventRecord = payload.new || payload.old; // INSERT/UPDATE는 new, DELETE는 old를 사용
+        const boardType = eventRecord.board_type;
+
+        // 2. 새 댓글(INSERT)일 경우에만 알람을 생성합니다.
         if (payload.eventType === 'INSERT') {
             const newComment = payload.new;
             // 본인 댓글은 알람 생성 안 함
@@ -134,12 +149,13 @@ function setupRealtimeSubscriptions() {
             }
         }
 
-        // 2. 어떤 변경(INSERT, UPDATE, DELETE)이든 항상 두 게시판을 모두 새로고침합니다.
-        //    이렇게 하면 삭제 시에도 실시간 반영이 확실하게 이루어집니다.
-        fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage);
-        fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage);
+        // 3. 어떤 변경(INSERT, UPDATE, DELETE)이든 항상 해당 게시판을 새로고침합니다.
+        if (boardType === 'general_comments') {
+            fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage);
+        } else if (boardType === 'restaurant_comments') {
+            fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage);
+        }
     });
-    // <!-- end fix -->
 
     api.setupSubscription('restaurant_reviews', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
@@ -243,6 +259,15 @@ async function handleDynamicContentClick(e) {
         }
         return;
     }
+    
+    // <!-- fix -->
+    // handleDynamicContentClick에 labSubTabBtn 핸들러 추가
+    const labSubTabBtn = e.target.closest('.lab-sub-tab-btn');
+    if (labSubTabBtn) {
+        ui.switchLabSubTab(labSubTabBtn.dataset.labTab);
+        return;
+    }
+    // <!-- end fix -->
 
     if (await handleReviewEvents(e)) return;
     if (await handleBoardEvents(e)) return;
@@ -713,4 +738,113 @@ function setupFilterListeners(pageType, updateFunction) {
     if(searchInput) searchInput.addEventListener('input', updateFunction);
     if(priceFilter) priceFilter.addEventListener('change', updateFunction);
     if(sortOrder) sortOrder.addEventListener('change', updateFunction);
+}
+
+/**
+ * '곰문' 실험실 기능의 전등 스위치에 대한 드래그 이벤트를 설정합니다.
+ * 이 함수가 곰 애니메이션을 시작시키는 '방아쇠' 역할을 합니다.
+ */
+function setupGommunLightSwitchListeners() {
+    const lightSwitchLabel = document.querySelector('.light-switch-label');
+    const line = document.querySelector('.gommun-container .line');
+    if (!lightSwitchLabel || !line) return;
+
+    let isDragging = false;
+    let startY = 0;
+    let startHeight = 0;
+    const maxDrag = 50; // 최대 당길 수 있는 거리
+
+    const handleDragStart = (e) => {
+        const lightSwitch = document.getElementById('gommun-light-switch');
+        if (lightSwitch.disabled) return;
+        
+        e.preventDefault();
+        isDragging = true;
+        startY = e.pageY || e.touches[0].pageY;
+        startHeight = line.clientHeight;
+        line.style.transition = 'none'; // 드래그 중에는 transition 해제
+    };
+
+    const handleDragMove = (e) => {
+        if (!isDragging) return;
+        const currentY = e.pageY || e.touches[0].pageY;
+        const diff = currentY - startY;
+        let newHeight = startHeight + diff;
+        
+        if (newHeight > startHeight + maxDrag) newHeight = startHeight + maxDrag;
+        if (newHeight < startHeight) newHeight = startHeight;
+        
+        line.style.height = `${newHeight}px`;
+    };
+
+    const handleDragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        line.style.transition = 'height 0.3s ease';
+        
+        const finalHeight = line.clientHeight;
+        
+        // 충분히 당겼을 때만 애니메이션을 실행합니다.
+        if (finalHeight > startHeight + maxDrag / 2) {
+            handleGommunAnimation();
+        }
+        
+        // 줄을 원래 높이로 되돌립니다.
+        setTimeout(() => {
+            line.style.height = `${startHeight}px`;
+        }, 100);
+    };
+
+    lightSwitchLabel.addEventListener('mousedown', handleDragStart);
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+
+    lightSwitchLabel.addEventListener('touchstart', handleDragStart);
+    document.addEventListener('touchmove', handleDragMove);
+    document.addEventListener('touchend', handleDragEnd);
+}
+
+/**
+ * '곰문' 기능의 전체 애니메이션 시퀀스를 처리합니다.
+ */
+function handleGommunAnimation() {
+    const lightSwitch = document.getElementById('gommun-light-switch');
+    const container = document.querySelector('.gommun-container');
+    const line = container.querySelector('.line');
+    if (!lightSwitch || !container || lightSwitch.disabled) return;
+
+    lightSwitch.disabled = true; // 애니메이션 동안 조작 방지
+
+    // 1. 불 켜기 (즉시 실행)
+    lightSwitch.checked = true;
+    container.classList.add('light-on');
+
+    // 2. 0.5초 뒤, 문 열고 곰 등장 애니메이션 시작
+    setTimeout(() => {
+        container.classList.add('bear-animated');
+    }, 500);
+
+    // 3. 2.3초 뒤, 곰이 팔을 뻗어 불을 끔
+    setTimeout(() => {
+        lightSwitch.checked = false;
+        if (line) {
+            line.classList.add('pulling');
+            setTimeout(() => line.classList.remove('pulling'), 500);
+        }
+    }, 2300); 
+
+    // 4. 2.5초 뒤, 배경이 다시 어두워짐
+    setTimeout(() => {
+        container.classList.remove('light-on');
+    }, 2500);
+
+    // 5. 5.5초 뒤, 곰이 퇴장하고 문이 닫힘
+    setTimeout(() => {
+        container.classList.remove('bear-animated');
+    }, 5500);
+
+    // 6. 6초 뒤, 모든 애니메이션이 끝나면 다시 스위치를 당길 수 있도록 활성화
+    setTimeout(() => {
+        lightSwitch.disabled = false;
+    }, 6000);
 }
