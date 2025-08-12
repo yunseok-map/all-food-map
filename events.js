@@ -13,6 +13,9 @@ let allRestaurantsData = [];
 let generalCommentsCurrentPage = 1;
 let restaurantCommentsCurrentPage = 1;
 
+// 알람 데이터를 저장하고, 브라우저 저장소에서 기존 알람을 불러옵니다.
+let notifications = JSON.parse(localStorage.getItem('notifications')) || [];
+
 // 라이트박스 상태 변수
 let lightboxImages = [];
 let currentLightboxIndex = 0;
@@ -27,7 +30,11 @@ export async function initializeApp() {
     ui.initializeUI();
     initializeEventListeners();
     allRestaurantsData = await api.fetchAllRestaurantData();
-    loadAllReviews(); // ▼ 데이터 미리 불러오기 ▼
+    
+    // 페이지가 처음 로드될 때, 저장되어 있던 알람들을 화면에 표시합니다.
+    ui.renderNotifications(notifications);
+    
+    loadAllReviews();
     loadInitialData();
     setupRealtimeSubscriptions();
 }
@@ -41,11 +48,13 @@ function initializeEventListeners() {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
         ui.switchTab(btn.dataset.tab);
         document.getElementById('menu-panel').classList.remove('open');
+        btn.blur();
     }));
 
     document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.addEventListener('click', () => {
         ui.switchSubTab(btn.dataset.subTab);
         updateListForActiveTab();
+        btn.blur();
     }));
 
     document.getElementById('aurora-toggle-btn').addEventListener('click', ui.toggleAuroraMode);
@@ -53,14 +62,19 @@ function initializeEventListeners() {
     
     document.getElementById('notification-bell-icon').addEventListener('click', handleNotificationBellClick);
 
+    // '알람 모두 삭제' 버튼에 대한 이벤트 리스너를 추가합니다.
+    document.getElementById('clear-all-notifications-btn').addEventListener('click', () => {
+        notifications = [];
+        localStorage.removeItem('notifications');
+        ui.renderNotifications(notifications);
+    });
+
     // 라이트박스 이벤트 리스너
     document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
     document.getElementById('lightbox-prev').addEventListener('click', showPrevLightboxImage);
     document.getElementById('lightbox-next').addEventListener('click', showNextLightboxImage);
     document.getElementById('image-lightbox').addEventListener('click', (e) => {
-        if (e.target.id === 'image-lightbox') {
-            closeLightbox();
-        }
+        if (e.target.id === 'image-lightbox') closeLightbox();
     });
     document.getElementById('lightbox-image').addEventListener('wheel', handleLightboxZoom);
     document.addEventListener('keydown', handleLightboxKeyPress);
@@ -100,34 +114,32 @@ async function loadInitialData() {
 }
 
 function setupRealtimeSubscriptions() {
-    api.setupSubscription('comments', async () => {
-        const openReplyForms = document.querySelectorAll('.reply-form-container.open');
-        const openReplyLists = document.querySelectorAll('.replies-container.open');
-        const openParentIdsForForms = Array.from(openReplyForms).map(form => form.closest('.comment-item').dataset.commentId);
-        const openParentIdsForLists = Array.from(openReplyLists).map(list => list.closest('.comment-item').dataset.commentId);
-
-        await Promise.all([
-            fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage),
-            fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage)
-        ]);
-
-        openParentIdsForForms.forEach(id => {
-            const commentItem = document.querySelector(`.comment-item[data-comment-id="${id}"]`);
-            if (commentItem) {
-                const form = commentItem.querySelector('.reply-form-container');
-                if (form) form.classList.add('open');
+    // <!-- fix -->
+    // 'comments' 테이블에 변화가 생길 때마다 알람 생성과 게시판 새로고침을 모두 처리합니다.
+    api.setupSubscription('comments', (payload) => {
+        // 1. 새 댓글(INSERT)일 경우에만 알람을 생성합니다.
+        if (payload.eventType === 'INSERT') {
+            const newComment = payload.new;
+            // 본인 댓글은 알람 생성 안 함
+            if (newComment.user_id !== api.currentUserId) {
+                const notification = {
+                    id: `noti-${newComment.id}`,
+                    text: `'${newComment.nickname}'님이 새 댓글을 남겼습니다: ${newComment.text.substring(0, 20)}...`,
+                    createdAt: newComment.created_at,
+                    boardType: newComment.board_type,
+                };
+                notifications.unshift(notification);
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+                ui.renderNotifications(notifications);
             }
-        });
-        openParentIdsForLists.forEach(id => {
-            const commentItem = document.querySelector(`.comment-item[data-comment-id="${id}"]`);
-            if (commentItem) {
-                const list = commentItem.querySelector('.replies-container');
-                const button = commentItem.querySelector('.toggle-replies-btn');
-                if (list) list.classList.add('open');
-                if (button) button.textContent = '답글 숨기기';
-            }
-        });
+        }
+
+        // 2. 어떤 변경(INSERT, UPDATE, DELETE)이든 항상 두 게시판을 모두 새로고침합니다.
+        //    이렇게 하면 삭제 시에도 실시간 반영이 확실하게 이루어집니다.
+        fetchAndRenderBoardComments('general_comments', generalCommentsCurrentPage);
+        fetchAndRenderBoardComments('restaurant_comments', restaurantCommentsCurrentPage);
     });
+    // <!-- end fix -->
 
     api.setupSubscription('restaurant_reviews', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
@@ -139,6 +151,7 @@ function setupRealtimeSubscriptions() {
             }
         }
     });
+
     api.setupSubscription('user_place_interactions', (payload) => {
         const record = payload.new.id ? payload.new : payload.old;
         if (record && record.place_id && record.place_type) {
@@ -147,6 +160,7 @@ function setupRealtimeSubscriptions() {
             }
         }
     });
+
     api.setupPresence(userCount => {
         const counter = document.getElementById('presence-counter');
         if (counter) counter.textContent = `현재 ${userCount}명 접속 중`;
@@ -156,6 +170,15 @@ function setupRealtimeSubscriptions() {
 // --- 중앙 이벤트 핸들러 (이벤트 위임) ---
 
 async function handleDynamicContentClick(e) {
+    const notificationItem = e.target.closest('.notification-item');
+    if (notificationItem) {
+        const idToDelete = notificationItem.dataset.notificationId;
+        notifications = notifications.filter(n => n.id !== idToDelete);
+        localStorage.setItem('notifications', JSON.stringify(notifications));
+        ui.renderNotifications(notifications);
+        return;
+    }
+
     const categoryGroupHeader = e.target.closest('.category-group-header');
     if (categoryGroupHeader) {
         const content = categoryGroupHeader.nextElementSibling;
@@ -173,7 +196,6 @@ async function handleDynamicContentClick(e) {
             details.classList.toggle('open');
             cardHeader.querySelector('svg')?.classList.toggle('rotate-180');
             if (details.classList.contains('open')) {
-                // 리뷰 섹션이 열릴 때 리뷰를 로드하고 별점 입력을 렌더링
                 await fetchAndRenderReviews(restaurantId, details.querySelector('.reviews-list'));
                 renderStarRatingInput(details.querySelector('.stars-input'));
             }
@@ -424,7 +446,6 @@ async function postReview(button) {
     }
 }
 
-// 수정된 부분: 삭제 후 즉시 UI 업데이트
 async function deleteReview(button) {
     const reviewId = button.dataset.reviewId;
     const card = button.closest('[data-restaurant-id]');

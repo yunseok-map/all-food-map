@@ -247,7 +247,7 @@ export function switchTab(mainTab) {
         theme = currentSubTab;
     } else if (mainTab === 'review-collection') {
         theme = 'review-collection';
-    } else if (mainTab === 'lab') { // ▼ 이 부분을 추가해주세요! ▼
+    } else if (mainTab === 'lab') {
         theme = 'lab';
     }
 
@@ -334,3 +334,36 @@ export function renderAllReviewsList(container, reviews) {
 
     container.innerHTML = reviewBoardHTML;
 }
+
+// <!-- fix -->
+// --- 알람 UI 렌더링 함수 ---
+export function renderNotifications(notifications) {
+    const listContent = document.getElementById('notification-list-content');
+    const countBadge = document.getElementById('notification-count');
+
+    if (!listContent || !countBadge) return;
+
+    if (notifications.length === 0) {
+        listContent.innerHTML = '<p class="text-center text-sm theme-text-subtitle py-4">새로운 알림이 없습니다.</p>';
+        countBadge.classList.add('hidden');
+        return;
+    }
+
+    countBadge.textContent = notifications.length;
+    countBadge.classList.remove('hidden');
+
+    listContent.innerHTML = '';
+    notifications.forEach(noti => {
+        const item = document.createElement('div');
+        // 각 알람 아이템에 고유 ID를 데이터 속성으로 심어줍니다. (삭제할 때 사용)
+        item.className = 'notification-item';
+        item.dataset.notificationId = noti.id; 
+        
+        item.innerHTML = `
+            <p class="notification-item-text">${noti.text}</p>
+            <p class="notification-item-time">${new Date(noti.createdAt).toLocaleString('ko-KR')}</p>
+        `;
+        listContent.appendChild(item);
+    });
+}
+// <!-- end fix -->
